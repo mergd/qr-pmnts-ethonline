@@ -1,17 +1,17 @@
 {
-	"name": "Privy PWA Demo",
-	"short_name": "Privy PWA",
-	"description": "Demo of using Privy in a progressive web app (PWA)",
+	"name": "pmnts",
+	"short_name": "pmnts App",
+	"description": "App for making pmnts to others",
 	"icons": [
 		{
-			"src": "/images/blobby-192.png",
-			"type": "image/png",
-			"sizes": "192x192"
+			"src": "/images/android-chrome-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
 		},
 		{
-			"src": "/images/blobby-512.png",
-			"type": "image/png",
-			"sizes": "512x512"
+			"src": "/images/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
 		}
 	],
 	"start_url": "/?source=pwa",

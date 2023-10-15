@@ -1,29 +1,8 @@
-# Privy PWA Demo
+# pmnts Dapp
+
+pmnts dapp allows for people to create and send payments on a slick PWA interface.
 
 This is a template progressive web app (PWA) built with [Privy](https://www.privy.io/), [Viem](https://viem.sh/), [NextPWA](https://www.npmjs.com/package/next-pwa), and [TailwindCSS](https://tailwindcss.com/). All transactions are sent on the [Base](https://base.org/) Goerli testnet.
-
-You can see the deployed version at [pwa.privy.io](https://pwa.privy.io/).
-
-## Setup
-
-First, clone this repo:
-
-```sh
-git clone https://github.com/privy-io/create-privy-pwa.git
-```
-
-Next, install dependencies, including `@privy-io/react-auth`, `viem`, and `next-pwa`:
-
-```sh
-pnpm i
-```
-
-Next, run `cp .env.example.local .env.local` to create your own env file, and add your Privy App ID:
-```
-NEXT_PUBLIC_PRIVY_APP_ID=insert-your-app-id
-```
-
-Lastly, run `npm run dev` and visit `http://localhost:3004` in your browser to see the PWA in action! For testing development on mobile, we recommend using `ngrok` ([guide](https://www.aleksandrhovhannisyan.com/blog/test-localhost-on-mobile/)).
 
 ## Points of Interest
 

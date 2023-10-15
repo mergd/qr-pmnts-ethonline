@@ -1,5 +1,6 @@
 import TopNav from '@/components/top-nav'
 import BottomNav from '@/components/bottom-nav'
+
 import { usePrivy } from '@privy-io/react-auth'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'

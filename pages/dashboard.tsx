@@ -8,6 +8,7 @@ import {
 	PiggyBankIcon,
 	Wallet,
 	GiftIcon,
+	ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -22,6 +23,19 @@ import { TableDemo } from '@/components/txns-table'
 
 import Link from 'next/link'
 const Dashboard = () => {
+	const pointsbanner = (
+		<Alert className='my-4'>
+			<GiftIcon className='h-6 w-6 mb-2' />
+			<AlertTitle>You have 200 points!</AlertTitle>
+			<AlertDescription className='flex flex-row '>
+				Head to the <Link href={'/points'}>points store</Link> to spend them!
+				<Link href={'/points'}>
+					<ChevronRight className='h-8 w-8 mb-2' />
+				</Link>
+			</AlertDescription>
+		</Alert>
+	)
+
 	// You can also import other linking methods, like linkWallet, linkEmail, linkDiscord, etc.
 	const { user, linkPhone, linkGoogle, linkApple } = usePrivy()
 	return (
@@ -79,16 +93,8 @@ const Dashboard = () => {
 						</MenubarTrigger>
 					</MenubarMenu>
 				</Menubar>
-				<Alert className='my-4'>
-					<GiftIcon className='h-6 w-6 mb-2' />
-					<AlertTitle>You have 200 points!</AlertTitle>
-					<AlertDescription>
-						Head to the <Link href={'/points'}>points store</Link> to spend
-						them!
-					</AlertDescription>
-				</Alert>
 			</Section>
-
+			{pointsbanner}
 			{TableDemo()}
 		</AuthenticatedPage>
 	)

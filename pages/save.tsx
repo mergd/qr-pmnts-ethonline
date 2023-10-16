@@ -17,16 +17,27 @@ import {
 	CardTitle,
 } from '@/components/ui/card'
 
+import { usePrivy } from '@privy-io/react-auth'
+
 import { Input } from '@/components/ui/input'
 
 const Save = () => {
 	const [currentYieldAddr, setCurrentYieldAddr] = useState<Address>(zeroAddress)
 	const [underlyingAddress, setUnderlyingAddr] = useState<Address>(zeroAddress)
+	const [underlyingSymbol, setUnderlyingSymbol] = useState<string>('')
+	const [yieldName, setYieldName] = useState<string>('')
 	const [activeTab, setActiveTab] = useState<string>('deposit')
 
-	const handleYield = (yieldAddr: Address, underlying: Address) => {
+	const handleYield = (
+		yieldAddr: Address,
+		underlying: Address,
+		yieldName: string,
+		symbol: string
+	) => {
 		setCurrentYieldAddr(yieldAddr)
 		setUnderlyingAddr(underlying)
+		setYieldName(yieldName)
+		setUnderlyingSymbol(symbol)
 	}
 
 	const investWidget = () => {
@@ -100,7 +111,7 @@ const Save = () => {
 			<p> Make your savings work as hard as you...</p>
 
 			{SaveTable({ handleSelected: handleYield })}
-			{investWidget()}
+			{currentYieldAddr != zeroAddress && investWidget()}
 			{pointsInfo}
 		</AuthenticatedPage>
 	)

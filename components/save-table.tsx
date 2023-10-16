@@ -10,6 +10,8 @@ import { Address, zeroAddress } from 'viem'
 import React, { useState } from 'react'
 
 import Image from 'next/image'
+
+const addr1 = '0x000000000000000000000001' as Address
 const YieldData = [
 	{
 		id: '1',
@@ -26,7 +28,7 @@ const YieldData = [
 				apy: '5.00%',
 				deposited: '0.00',
 				chain: 'Mantle',
-				yieldAddress: zeroAddress,
+				yieldAddress: addr1,
 			},
 			{
 				yield_id: '2',
@@ -35,10 +37,10 @@ const YieldData = [
 				apy: '3.00%',
 				deposited: '0.00',
 				chain: 'Scroll',
-				yieldAddress: zeroAddress,
+				yieldAddress: addr1,
 			},
 		],
-		address: zeroAddress,
+		address: addr1,
 	},
 	{
 		id: '2',
@@ -56,7 +58,7 @@ const YieldData = [
 				apy: '10.00%',
 				deposited: '0.00',
 				chain: 'Scroll',
-				yieldAddress: zeroAddress,
+				yieldAddress: addr1,
 			},
 			{
 				yield_id: '2',
@@ -65,10 +67,10 @@ const YieldData = [
 				apy: '5.00%',
 				deposited: '0.00',
 				chain: 'Scroll',
-				yieldAddress: zeroAddress,
+				yieldAddress: addr1,
 			},
 		],
-		address: zeroAddress,
+		address: addr1,
 	},
 	{
 		id: 3,
@@ -87,15 +89,20 @@ const YieldData = [
 				apy: '30.00%',
 				deposited: '0.00',
 				chain: 'Mantle',
-				yieldAddress: zeroAddress,
+				yieldAddress: addr1,
 			},
 		],
-		address: zeroAddress,
+		address: addr1,
 	},
 ]
 
 type props = {
-	handleSelected: (yieldAddress: Address, underlyingAddress: Address) => void
+	handleSelected: (
+		yieldAddress: Address,
+		underlyingAddress: Address,
+		yieldName: string,
+		underlyingSymbol: string
+	) => void
 }
 
 export function SaveTable(Props: props) {
@@ -138,7 +145,9 @@ export function SaveTable(Props: props) {
 									setSelectedId(data.yields[index].yield_id + data.id)
 									Props.handleSelected(
 										data.yields[index].yieldAddress,
-										data.address
+										data.address,
+										yieldData.name,
+										data.name
 									)
 								}}
 							>

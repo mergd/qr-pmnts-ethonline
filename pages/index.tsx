@@ -1,9 +1,20 @@
-import Blobby from '@/components/svg/blobby'
 import { useLogin, usePrivy } from '@privy-io/react-auth'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { isAndroid } from 'react-device-detect'
+
+import {
+	Menubar,
+	MenubarContent,
+	MenubarItem,
+	MenubarMenu,
+	MenubarSeparator,
+	MenubarShortcut,
+	MenubarTrigger,
+} from '@/components/ui/menubar'
+
+import { QrCode, ScanBarcode, BadgeDollarSign, PiggyBank } from 'lucide-react'
 
 const Index = () => {
 	const [isInstalled, setIsInstalled] = useState(false)
@@ -18,7 +29,12 @@ const Index = () => {
 				isNewUser,
 				wasPreviouslyAuthenticated,
 			})
-			router.push('/dashboard')
+
+			if (isNewUser) {
+				router.push('/onboard')
+			} else {
+				router.push('/dashboard')
+			}
 		},
 		// Set up an `onError` callback to run when there is a `login` error
 		onError(error) {
@@ -57,17 +73,40 @@ const Index = () => {
 		})
 	}
 
+	const menuBar = (
+		<Menubar>
+			<MenubarMenu>
+				<MenubarTrigger>
+					<ScanBarcode className='h-4 w-4' />
+				</MenubarTrigger>
+				<MenubarTrigger>
+					<QrCode className='h-4 w-4' />
+				</MenubarTrigger>
+				<MenubarTrigger>
+					<BadgeDollarSign className='h-4 w-4' />
+				</MenubarTrigger>
+				<MenubarTrigger>
+					<PiggyBank className='h-4 w-4' />
+				</MenubarTrigger>
+			</MenubarMenu>
+		</Menubar>
+	)
+
 	return (
 		<>
 			<Head>
-				<title>Privy PWA Template</title>
+				<title> pmnts 💸 </title>
 			</Head>
+
 			<main>
 				<div className='flex h-screen w-screen flex-col items-center justify-center'>
-					<Blobby />
+					<h1 className='text-[100px] hover:animate-shake'>💸</h1>
+
 					<h2 className='my-4 text-xl font-semibold text-gray-800'>
-						Privy PWA Template
+						Make pmnts the easy way.
 					</h2>
+					{menuBar}
+
 					<div className='mt-2 w-1/2'>
 						{!isInstalled && isAndroid ? (
 							<button

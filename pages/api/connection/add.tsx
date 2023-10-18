@@ -1,6 +1,8 @@
-// FILEPATH: /pages/api/createFundConnection.tsx
+// FILEPATH: /pages/api/connection/addConnectionData.tsx
 
-import { pool } from './config'
+// @dev todo
+
+import { pool } from '../config'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
@@ -17,9 +19,10 @@ export default async function handler(
 
 	try {
 		await pool.query(
-			'INSERT INTO "Fund Connection" (connection_code, privyuuid) VALUES ($1, $2)',
+			'INSERT INTO fundconnection (connection_code, privy_uuid) VALUES ($1, $2)',
 			[connectionCode, privyuuid]
 		)
+
 		return res.status(200).json({ connectionCode })
 	} catch (error) {
 		return res.status(500).json({ error: 'Failed to create fund connection' })

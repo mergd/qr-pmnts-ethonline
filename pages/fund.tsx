@@ -1,96 +1,150 @@
-import React, { useState, useRef, useEffect } from 'react'
-import AuthenticatedPage from '@/components/authenticated-page'
-import Section from '@/components/section'
-import { links } from '@/lib/links'
+// React imports
+import { useState } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 
-import { CodeConnect } from '@/components/code-input'
+// Privy imports
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 
+// Component imports
+import { Label } from '@/components/ui/label'
+import { CodeConnect } from '@/components/code-input'
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardTitle,
 } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	SelectLabel,
+	SelectGroup,
+} from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useToast } from '@/components/ui/use-toast'
+
+// Icon imports
 import transfer from 'public/icons/mdi_transfer.png'
 import { Wallet2, ClipboardPaste, ChevronLeft } from 'lucide-react'
-import { Address, zeroAddress } from 'viem'
-import pmnts from 'public/pmnts-logo.png'
-import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
 
-import { WagmiConfig } from 'wagmi'
+// Utility imports
+import { Address, maxUint256, zeroAddress } from 'viem'
 import {
+	parseEther,
+	formatEther,
+	createPublicClient,
+	createWalletClient,
+	custom,
+} from 'viem'
+
+// Data imports
+import ERC20ABI from '@/public/ERC20ABI'
+import pmnts from 'public/pmnts-logo.png'
+import { CURRENCIES, PMNTS_ADDRESS } from '@/public/constants'
+import { links } from '@/lib/links'
+
+// Chain imports
+import {
+	baseGoerli,
 	mantleTestnet,
 	polygonZkEvmTestnet,
 	filecoinCalibration,
+	sepolia,
 	scrollSepolia,
-	goerli,
-	baseGoerli,
-	mainnet,
-} from 'wagmi/chains'
-import Link from 'next/link'
-
-import { usePrivy, useWallets } from '@privy-io/react-auth'
-import { createWalletClient, custom, parseEther } from 'viem'
-
-const alert = (
-	<Alert className=' rounded-md bg-blue-100 p-4 text-blue-700'>
-		<Wallet2 className='m h-4 w-4' />
-		<AlertTitle className='font-semibold'>No deposits needed</AlertTitle>
-		<AlertDescription className='text-sm'>
-			You don&apos;t need to deposit anything on pmnts
-			<br />
-			Simply open approval and they&apos;ll be transferred as you spend them.
-		</AlertDescription>
-	</Alert>
-)
-
-const info = (
-	<div className='mt-8 flex flex-col justify-center'>
-		<h1 className=' text-center font-serif text-xl font-bold text-gray-800'>
-			Transfer Helper
-		</h1>
-		<Image src={transfer} width={127} height={127} className='object-contain' />
-	</div>
-)
-
-const header = (
-	<div className='flex  justify-start pl-4 pt-4'>
-		<Link href={'/'}>
-			<Image src={pmnts} width={100} height={30} className='object-contain' />
-		</Link>
-	</div>
-)
-
-const metadata = {
-	name: 'pmnts',
-	description: 'pmnts app',
-	url: 'https://example.com',
-	icons: ['https://avatars.githubusercontent.com/u/37784886'],
-}
-const projectId = 'ade58b9c1b2fbb5886377e609bbfa1d3'
-
-const chains = [mainnet]
+	Chain,
+} from 'viem/chains'
 
 const Fund = () => {
-	const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata })
+	const { toast } = useToast()
 	const [retrievedAddr, setRetrievedAddr] = useState<Address>(zeroAddress)
+	const [requestedNetwork, setRequestedNetwork] = useState<Chain>(baseGoerli)
+	const [requestedCurrency, setRequestedCurrency] = useState<number>(0)
+	const [approveAmt, setApproveAmt] = useState<bigint>(BigInt(0))
+	const [userPrivyUUID, setUserPrivyUUID] = useState<string>('')
+	const [extWalletChainId, setExtWalletChainId] = useState<number>(0)
 
 	const mockAddr = '0x00000000000000000000000001' as Address
+	const networks = [
+		baseGoerli,
+		mantleTestnet,
+		polygonZkEvmTestnet,
+		filecoinCalibration,
+		sepolia,
+		scrollSepolia,
+	]
+	const alert = (
+		<Alert className=' rounded-md bg-blue-100 p-4 text-blue-700'>
+			<Wallet2 className='m h-4 w-4' />
+			<AlertTitle className='font-semibold'>No deposits needed</AlertTitle>
+			<AlertDescription className='text-sm'>
+				You don&apos;t need to deposit anything on pmnts
+				<br />
+				Simply open approval and they&apos;ll be transferred as you spend them.
+			</AlertDescription>
+		</Alert>
+	)
 
-	const codeSubmit = (code: Array<string>) => {
+	const info = (
+		<div className='mt-8 flex flex-col justify-center'>
+			<h1 className=' text-center font-serif text-xl font-bold text-gray-800'>
+				Transfer Helper
+			</h1>
+			<Image
+				src={transfer}
+				width={127}
+				height={127}
+				className='object-contain'
+			/>
+		</div>
+	)
+
+	const header = (
+		<div className='flex  justify-start pl-4 pt-4'>
+			<Link href={'/'}>
+				<Image src={pmnts} width={100} height={30} className='object-contain' />
+			</Link>
+		</div>
+	)
+
+	const codeSubmit = async (code: Array<string>) => {
 		const concatCode = code.join('')
 		console.log(concatCode)
-		// Should feed code to API to get uuid
-		// Fetch address from uuid
 
-		setRetrievedAddr(mockAddr)
+		const response = await fetch('/api/connection/get', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ connectioncode: code }),
+		})
+		console.log(response.status)
+
+		if (response.status == 200) {
+			const json = await response.json()
+
+			setUserPrivyUUID(json.privyuuid)
+			setRetrievedAddr(json.useraddr)
+		} else {
+			console.log(response.status, response.statusText)
+
+			toast({
+				title: 'The code is invalid, or there was a backend error',
+				description: `${response.status}: ${response.statusText}`,
+				variant: 'destructive',
+			})
+		}
 	}
 
 	const connectCard = (
 		<Card className='max-w-[400] overflow-hidden rounded-lg shadow-lg'>
-			<CardTitle className=' p-4'>Open Approval for Tokens</CardTitle>
+			<CardTitle className=' p-4 font-serif'>
+				Open Approval for Tokens
+			</CardTitle>
 			<div className='mx-4 my-2 p-2'>
 				{alert}
 
@@ -107,33 +161,44 @@ const Fund = () => {
 	const embeddedWallet = wallets.find(
 		(wallet) => wallet.walletClientType === 'privy'
 	)
+
 	const externalWallet = wallets.find(
 		(wallet) => wallet.walletClientType !== 'privy'
 	)
 	const [txIsLoading, setTxIsLoading] = useState(false)
 	const [txHash, setTxHash] = useState<string | undefined>()
 
-	const onTransfer = async () => {
+	const onApprove = async () => {
 		if (!externalWallet || !embeddedWallet) return
 		try {
-			// Switch chain to Base Goerli
-			await externalWallet.switchChain(baseGoerli.id)
+			// Switch chain to Requested network
+			await externalWallet.switchChain(requestedNetwork.id)
 
 			// Build viem wallet client for external wallet
 			const provider = await externalWallet.getEthereumProvider()
 			const walletClient = createWalletClient({
 				account: externalWallet.address as `0x${string}`,
-				chain: baseGoerli,
+				chain: requestedNetwork,
+				transport: custom(provider),
+			})
+
+			const publicClient = createPublicClient({
+				chain: requestedNetwork,
 				transport: custom(provider),
 			})
 
 			// Send transaction from external wallet
 			setTxIsLoading(true)
-			const _txHash = await walletClient.sendTransaction({
-				account: externalWallet.address as `0x${string}`,
-				to: embeddedWallet.address as `0x${string}`,
-				value: parseEther('0.005'),
+
+			const { request } = await publicClient.simulateContract({
+				address: CURRENCIES[requestedCurrency].address,
+				abi: ERC20ABI,
+				functionName: 'approve',
+				args: [PMNTS_ADDRESS, approveAmt],
 			})
+
+			const _txHash = await walletClient.sendTransaction(request)
+
 			setTxHash(_txHash)
 		} catch (e) {
 			console.error('Transfer failed with error ', e)
@@ -148,67 +213,182 @@ const Fund = () => {
 			method: 'wallet_addEthereumChain',
 			params: [
 				{
-					chainId: `0x${baseGoerli.id.toString(16)}`,
-					chainName: baseGoerli.name,
-					nativeCurrency: baseGoerli.nativeCurrency,
-					rpcUrls: [baseGoerli.rpcUrls.public?.http[0] ?? ''],
-					blockExplorerUrls: [baseGoerli.blockExplorers?.default.url ?? ''],
+					chainId: `0x${requestedNetwork.id.toString(16)}`,
+					chainName: requestedNetwork.name,
+					nativeCurrency: requestedNetwork.nativeCurrency,
+					rpcUrls: [requestedNetwork.rpcUrls.public?.http[0] ?? ''],
+					blockExplorerUrls: [
+						requestedNetwork.blockExplorers?.default.url ?? '',
+					],
 				},
 			],
 		})
 	}
 
-	const fund = (
-		<Section>
-			<p className='text-md mt-2 font-bold uppercase text-gray-700'>
-				Fund your embedded wallet
-			</p>
-			<p className='mt-2 text-sm text-gray-600'>
-				First, connect an external wallet to send assets to your embedded
-				wallet. The wallet <span className='font-bold'>must</span> support the
-				Base Goerli network. We recommend MetaMask.
-			</p>
+	// useEffect(() => {
+	// 	async function fetchChainId() {
+	// 		if (!externalWallet) return
+	// 		const provider = await externalWallet.getEthereumProvider()
+	// 		setExtWalletChainId(await provider.request({ method: 'eth_chainId' }))
+	// 	}
+	// 	fetchChainId()
+	// }, [requestedNetwork, externalWallet])
+
+	const onDisconnect = async () => {
+		if (!externalWallet) return
+		await externalWallet.disconnect()
+	}
+
+	const chainSelect = (
+		<Select onValueChange={(e) => setRequestedNetwork(networks[parseInt(e)])}>
+			<SelectTrigger className='w-[180px]'>
+				<SelectValue placeholder={`${requestedNetwork.name}`} />
+			</SelectTrigger>
+			<SelectContent className='bg-slate-50'>
+				<SelectGroup>
+					<SelectLabel>Chains</SelectLabel>
+
+					{networks.map((network, index) => (
+						<SelectItem key={network.id} value={index.toString()}>
+							{' '}
+							{network.name}{' '}
+						</SelectItem>
+					))}
+				</SelectGroup>
+			</SelectContent>
+		</Select>
+	)
+
+	const currencySelect = (
+		<Select onValueChange={(e) => setRequestedCurrency(parseInt(e))}>
+			<SelectTrigger className='w-[220px]'>
+				<SelectValue placeholder={'USD'} />
+			</SelectTrigger>
+			<SelectContent className='bg-slate-50'>
+				<SelectGroup>
+					<SelectLabel>Tokens</SelectLabel>
+					{CURRENCIES.map((currency, index) => (
+						<SelectItem
+							key={index}
+							value={index.toString()}
+							className='no-wrap flex flex-row items-center gap-1'
+						>
+							{' '}
+							<Image
+								src={`/icons/${currency.icon}`}
+								height={20}
+								width={20}
+								className='-mb-2'
+							/>{' '}
+							{currency.name}{' '}
+						</SelectItem>
+					))}
+				</SelectGroup>
+			</SelectContent>
+		</Select>
+	)
+
+	const connectAndFund = (
+		<div>
+			<div className='flex flex-row items-center justify-between'>
+				<p
+					className={`mt-2 text-sm  ${
+						externalWallet ? 'text-gray-400' : 'text-gray-600'
+					}`}
+				>
+					Connect your wallet:
+				</p>
+
+				{externalWallet && (
+					<p className='text-gray-600' onClick={onDisconnect}>
+						{' '}
+						Disconnect{' '}
+					</p>
+				)}
+			</div>
 			<p className='mt-2 text-sm text-gray-600'></p>
-			<button
+			{!externalWallet && (
+				<button
+					type='button'
+					className='mt-2 w-full rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-indigo-400'
+					onClick={connectWallet}
+				>
+					{!externalWallet ? 'Connect a wallet' : 'Connect another wallet?'}
+				</button>
+			)}
+			{externalWallet && (
+				<div>
+					<p className='text-md mt-2 text-gray-800'>
+						{' '}
+						Connected Wallet:{' '}
+						<span className='rounded-md bg-blue-600 px-2 py-1 text-sm font-semibold text-slate-200'>
+							{externalWallet.address.substring(0, 6) +
+								'...' +
+								externalWallet.address.slice(-4)}
+						</span>
+					</p>
+					<div className='mt-2 flex flex-row items-center justify-between gap-4'>
+						<p className='mt-2 text-sm text-gray-600'>Chain: </p>
+						{chainSelect}
+
+						<p className='mt-2 text-sm text-gray-600'>Currency: </p>
+
+						{currencySelect}
+					</div>
+
+					<div>
+						<Label
+							htmlFor='approveAmt'
+							className='mb-1 mt-2 flex justify-between '
+						>
+							{' '}
+							<span>Approve Amount</span>{' '}
+							<span
+								className='text-slate-500'
+								onClick={() => setApproveAmt(maxUint256)}
+							>
+								{' '}
+								Max Amount
+							</span>{' '}
+						</Label>
+						<Input
+							id='approveAmt'
+							placeholder='0.00'
+							onChange={(e) =>
+								setApproveAmt(parseEther(parseInt(e.target.value).toString()))
+							}
+							value={
+								approveAmt === maxUint256
+									? 'Infinite Approval'
+									: parseInt(formatEther(approveAmt)).toLocaleString()
+							}
+						/>
+					</div>
+
+					<button
+						type='button'
+						className='mt-6 w-full rounded-md bg-blue-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-blue-500'
+						onClick={onApprove}
+						disabled={!externalWallet || txIsLoading}
+					>
+						Approve{' '}
+						{approveAmt === maxUint256
+							? 'Infinite'
+							: parseInt(formatEther(approveAmt)).toLocaleString()}{' '}
+						{CURRENCIES[requestedCurrency].name}
+					</button>
+				</div>
+			)}
+
+			{/* {requestedNetwork.id != extWalletChainId &&  <button
 				type='button'
-				className='mt-2 w-full rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-indigo-400'
-				onClick={connectWallet}
-			>
-				{!externalWallet ? 'Connect a wallet' : 'Connect another wallet?'}
-			</button>
-			<textarea
-				value={
-					externalWallet
-						? JSON.stringify(externalWallet, null, 2)
-						: 'No external wallet connected'
-				}
-				className='mt-4 h-fit w-full rounded-md bg-slate-700 p-4 font-mono text-xs text-slate-50'
-				rows={9}
-				readOnly
-			/>
-			<p className='mt-2 text-sm text-gray-600'>
-				Next, add the Base Goerli network to your wallet.
-			</p>
-			<button
-				type='button'
-				className='mt-2 w-full rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-indigo-400'
+				className='mt-2 w-full rounded-md bg-blue-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-blue-400'
 				onClick={onAddNetwork}
 				disabled={!externalWallet}
 			>
-				Add Base Goerli Network
-			</button>
-			<p className='mt-2 text-sm text-gray-600'>
-				Lastly, click the button below to transfer 0.005 Goerli ETH to your
-				embedded wallet.
-			</p>
-			<button
-				type='button'
-				className='mt-2 w-full rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-indigo-400'
-				onClick={onTransfer}
-				disabled={!externalWallet || txIsLoading}
-			>
-				Transfer 0.005 ETH
-			</button>
+				Add {requestedNetwork.name}
+			</button>} */}
+
 			{txHash && (
 				<p className='mt-2 text-sm italic text-gray-600'>
 					See your transaction on{' '}
@@ -218,12 +398,12 @@ const Fund = () => {
 						target='_blank'
 						rel='noreferrer noopener'
 					>
-						etherscan
+						Etherscan
 					</a>
 					.
 				</p>
 			)}
-		</Section>
+		</div>
 	)
 
 	const approvalCard = (
@@ -233,12 +413,10 @@ const Fund = () => {
 					className='h-6 w-6 '
 					onClick={() => setRetrievedAddr(zeroAddress)}
 				/>
-				<CardTitle className=' p-4'>Token Approval</CardTitle>
+				<CardTitle className=' p-4 font-serif'>Token Approval</CardTitle>
 			</div>
 
-			<CardDescription className='p-4'>
-				<w3m-button />
-			</CardDescription>
+			<CardDescription className='p-4'>{connectAndFund}</CardDescription>
 
 			<div className='mx-4 my-2 p-2'>
 				<div className='my-2'></div>
@@ -247,17 +425,15 @@ const Fund = () => {
 	)
 
 	return (
-		<WagmiConfig config={wagmiConfig}>
-			<div>
-				{header}
-				<div className='min-h-screen bg-gray-100 '>
-					<div className='align-center mx-6 my-4 grid grid-cols-1 gap-4 pt-10 md:grid-cols-2'>
-						{info}
-						{retrievedAddr === zeroAddress ? connectCard : approvalCard}
-					</div>
+		<div>
+			{header}
+			<div className='min-h-screen bg-gray-100 '>
+				<div className='align-center mx-6 my-4 grid grid-cols-1 gap-4 pt-10 md:grid-cols-2'>
+					{info}
+					{retrievedAddr === zeroAddress ? connectCard : approvalCard}
 				</div>
 			</div>
-		</WagmiConfig>
+		</div>
 	)
 }
 

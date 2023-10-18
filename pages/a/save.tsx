@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ZapIcon, ChevronRight, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
 import {
 	Card,
 	CardContent,
@@ -16,17 +17,24 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card'
+import { ToastAction } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/use-toast'
 
 import { usePrivy } from '@privy-io/react-auth'
 
 import { Input } from '@/components/ui/input'
+import { parseEther, formatEther } from 'viem'
+import { Label } from '@/components/ui/label'
 
 const Save = () => {
+	const { toast } = useToast()
+
 	const [currentYieldAddr, setCurrentYieldAddr] = useState<Address>(zeroAddress)
 	const [underlyingAddress, setUnderlyingAddr] = useState<Address>(zeroAddress)
 	const [underlyingSymbol, setUnderlyingSymbol] = useState<string>('')
 	const [yieldName, setYieldName] = useState<string>('')
 	const [activeTab, setActiveTab] = useState<string>('deposit')
+	const [amt, setAmt] = useState<bigint>(BigInt(0))
 
 	const handleYield = (
 		yieldAddr: Address,
@@ -40,19 +48,73 @@ const Save = () => {
 		setUnderlyingSymbol(symbol)
 	}
 
-	const investWidget = () => {
+	const handleDeposit = async () => {
+		// deposit
+
+		toast({
+			title: 'Scheduled: Catch up ',
+			description: 'Friday, February 10, 2023 at 5:57 PM',
+			action: <ToastAction altText='Goto schedule to undo'>Undo</ToastAction>,
+		})
+	}
+	const handleWithdraw = async () => {
+		// withdraw
+
+		toast({
+			title: 'Scheduled: Catch up ',
+			description: 'Friday, February 10, 2023 at 5:57 PM',
+			action: <ToastAction altText='Goto schedule to undo'>Undo</ToastAction>,
+		})
+	}
+
+	const amtSetter = (
+		<div className=''>
+			<Label htmlFor='inputAmt'>Amount</Label>
+			<Input
+				id='inputAmt'
+				onChange={(e) => setAmt(parseEther(e.target.valueAsNumber.toFixed(2)))}
+				value={formatEther(amt).toLocaleString()}
+				placeholder='0.00'
+			/>
+			<Button
+				variant={'default'}
+				className='capitalize'
+				inputMode='numeric'
+				onClick={activeTab === 'deposit' ? handleDeposit : handleWithdraw}
+			>
+				{' '}
+				{activeTab}{' '}
+			</Button>
+		</div>
+	)
+
+	const investCard = () => {
 		return (
 			<Tabs defaultValue='deposit' className='mt-4'>
-				<TabsList className='grid w-full grid-cols-2'>
-					<TabsTrigger value='deposit'>Deposit</TabsTrigger>
-					<TabsTrigger value='withdraw'>Withdraw</TabsTrigger>
+				<TabsList className='grid w-full grid-cols-2 bg-slate-200'>
+					<TabsTrigger
+						onClick={() => setActiveTab('deposit')}
+						className={`${activeTab === 'deposit' ? 'bg-slate-100' : ''}`}
+						value='deposit'
+					>
+						Deposit
+					</TabsTrigger>
+					<TabsTrigger
+						onClick={() => setActiveTab('withdraw')}
+						className={`${activeTab === 'withdraw' ? 'bg-slate-100' : ''}`}
+						value='withdraw'
+					>
+						Withdraw
+					</TabsTrigger>
 				</TabsList>
 				<TabsContent value='deposit'>
 					<Card>
 						<CardHeader>
 							<CardTitle>Invest</CardTitle>
 							<CardDescription>
-								Deposit your assets and earn interest.
+								Deposit your assets into{' '}
+								<span className='font-bold'> {yieldName}</span> and earn
+								interest.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -65,6 +127,8 @@ const Save = () => {
 									<p className='text-xs'>Earn</p>
 									<p className='text-lg font-bold'>0.00</p>
 								</div>
+
+								{amtSetter}
 							</div>
 						</CardContent>
 					</Card>
@@ -111,7 +175,7 @@ const Save = () => {
 			<p> Make your savings work as hard as you...</p>
 
 			{SaveTable({ handleSelected: handleYield })}
-			{currentYieldAddr != zeroAddress && investWidget()}
+			{currentYieldAddr != zeroAddress && investCard()}
 			{pointsInfo}
 		</AuthenticatedPage>
 	)

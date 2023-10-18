@@ -5,11 +5,7 @@ import { Pool } from 'pg'
 import { baseGoerli } from 'viem/chains'
 
 export const pool = new Pool({
-	user: process.env.PGUSER,
-	host: process.env.PGHOST,
-	database: process.env.PGDATABASE,
-	password: process.env.PGPASSWORD,
-	port: 7120,
+	connectionString: process.env.DATABASE_URL,
 })
 
 export const account = privateKeyToAccount(process.env.DEPLOYER_KEY as Address)

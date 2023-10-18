@@ -25,12 +25,12 @@ import Link from 'next/link'
 const Dashboard = () => {
 	const pointsbanner = (
 		<Alert className='my-4'>
-			<GiftIcon className='h-6 w-6 mb-2' />
+			<GiftIcon className='mb-2 h-6 w-6' />
 			<AlertTitle>You have 200 points!</AlertTitle>
-			<AlertDescription className='flex flex-row '>
-				Head to the <Link href={'/points'}>points store</Link> to spend them!
+			<AlertDescription className='flex flex-row items-center justify-between'>
+				<p>Head to the points store to spend them!</p>
 				<Link href={'/points'}>
-					<ChevronRight className='h-8 w-8 mb-2' />
+					<ChevronRight className='mb-2 h-8 w-8' />
 				</Link>
 			</AlertDescription>
 		</Alert>
@@ -38,17 +38,18 @@ const Dashboard = () => {
 
 	// You can also import other linking methods, like linkWallet, linkEmail, linkDiscord, etc.
 	const { user, linkPhone, linkGoogle, linkApple } = usePrivy()
+	console.log(user?.id)
 	return (
 		<AuthenticatedPage>
 			<Section>
-				<h1 className='text-3xl font-bold my-4 font-serif'>gm {!user},</h1>
-				<Menubar className='h-24 rounded-lg justify-center'>
+				<h1 className='my-4 font-serif text-3xl font-bold'>gm</h1>
+				<Menubar className='h-24 justify-center rounded-lg'>
 					<MenubarMenu>
 						<MenubarTrigger className=' hover:bg-gray-200'>
 							<Link href={'/qr'}>
 								<div>
-									<QrCode className='w-16 h-16' strokeWidth={1} />
-									<p className='text-xs uppercase font-bold text-center'>
+									<QrCode className='h-16 w-16' strokeWidth={1} />
+									<p className='text-center text-xs font-bold uppercase'>
 										{' '}
 										qr{' '}
 									</p>
@@ -59,8 +60,8 @@ const Dashboard = () => {
 						<MenubarTrigger className=' hover:bg-gray-200'>
 							<Link href={'/scan'}>
 								<div>
-									<ScanBarcodeIcon className='w-16 h-16' strokeWidth={1} />
-									<p className='text-xs uppercase font-bold text-center'>
+									<ScanBarcodeIcon className='h-16 w-16' strokeWidth={1} />
+									<p className='text-center text-xs font-bold uppercase'>
 										{' '}
 										scan{' '}
 									</p>
@@ -71,8 +72,8 @@ const Dashboard = () => {
 						<MenubarTrigger className=' hover:bg-gray-200'>
 							<Link href={'/save'}>
 								<div>
-									<PiggyBankIcon className='w-16 h-16' strokeWidth={1} />
-									<p className='text-xs uppercase font-bold text-center'>
+									<PiggyBankIcon className='h-16 w-16' strokeWidth={1} />
+									<p className='text-center text-xs font-bold uppercase'>
 										{' '}
 										save{' '}
 									</p>
@@ -83,8 +84,8 @@ const Dashboard = () => {
 						<MenubarTrigger className=' hover:bg-gray-200'>
 							<Link href={'/wallet'}>
 								<div>
-									<Wallet className='w-16 h-16' strokeWidth={1} />
-									<p className='text-xs uppercase font-bold text-center'>
+									<Wallet className='h-16 w-16' strokeWidth={1} />
+									<p className='text-center text-xs font-bold uppercase'>
 										{' '}
 										wallet{' '}
 									</p>
@@ -96,6 +97,8 @@ const Dashboard = () => {
 			</Section>
 			{pointsbanner}
 			{TableDemo()}
+
+			<Link href='/fundMobile'>test</Link>
 		</AuthenticatedPage>
 	)
 }

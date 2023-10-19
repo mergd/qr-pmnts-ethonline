@@ -9,8 +9,11 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChevronLeft } from 'lucide-react'
 import { useRouter } from 'next/router'
+import { useToast } from '@/components/ui/use-toast'
+import { ToastAction } from '@/components/ui/toast'
 
 const fundMobile = () => {
+	const { toast } = useToast()
 	const { user } = usePrivy()
 	const privyuuid = user?.id
 	const [connectionCode, setConnectionCode] = useState<string>()
@@ -35,6 +38,14 @@ const fundMobile = () => {
 		callFunc()
 	}, [privyuuid])
 
+	const copyCode = () => {
+		if (!connectionCode) return
+		navigator.clipboard.writeText(connectionCode)
+		toast({
+			title: 'Copied Code!',
+		})
+	}
+
 	return (
 		<AuthenticatedPage>
 			<ChevronLeft onClick={goBack} className='mb-2 h-8 w-8' />
@@ -52,16 +63,17 @@ const fundMobile = () => {
 						<p className='text-slate-700'>
 							{' '}
 							Open{' '}
-							<Link
-								href='/fund'
-								className='!underline-offset-2 hover:text-blue-900'
-							>
-								this link
-							</Link>{' '}
-							on your computer, and enter in this connection code:{' '}
+							<span className='underline-offset-2 font-bold hover:text-slate-600'>
+								<Link href='/fund'>this link</Link>{' '}
+							</span>
+							on your computer, and enter in this connection code: <br />
+							<span className='text-slate-800 text-sm'>(Tap to copy)</span>
 						</p>
 						{connectionCode && (
-							<h1 className='mt-4 text-center text-6xl tracking-widest text-slate-800'>
+							<h1
+								className='mt-4 text-center text-6xl tracking-widest text-slate-800'
+								onClick={copyCode}
+							>
 								{' '}
 								{connectionCode}
 							</h1>

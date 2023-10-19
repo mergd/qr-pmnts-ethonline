@@ -31,7 +31,7 @@ const OnboardPage = () => {
 					To get started, set up a funding source.
 				</p>
 				<Button className='bg-blue-700 text-slate-200 mt-4'>
-					<Link href={'/dashboard'}> Fund </Link>
+					<Link href={'/fundMobile'}> Fund </Link>
 				</Button>
 				<Button variant='link' className='mt-4'>
 					<Link

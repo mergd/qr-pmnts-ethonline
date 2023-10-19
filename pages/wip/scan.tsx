@@ -2,20 +2,13 @@ import React, { useState } from 'react'
 
 import AuthenticatedPage from '@/components/authenticated-page'
 import { usePrivy } from '@privy-io/react-auth'
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-	DialogTrigger,
-} from '@/components/ui/dialog'
-import QrPage from '@/components/create-qr'
+import pmnts from 'public/pmnts-icon.png'
+import Image from 'next/image'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 
-const ShowQrPage = () => {
-	const { user } = usePrivy()
+const QrPage = () => {
 	const [scanResult, setScanResult] = useState<string>('0')
 	const BarcodeScanner = dynamic(() => import('@/components/qrscan'), {
 		ssr: false,
@@ -27,14 +20,11 @@ const ShowQrPage = () => {
 	}
 	return (
 		<AuthenticatedPage>
-			{user && (
-				<Dialog>
-					<DialogTrigger> Open QR</DialogTrigger>
-					<QrPage privyuuid={user.id} />
-				</Dialog>
-			)}
+			<div className='flex h-[90%] w-[90%] flex-col items-center justify-center'>
+				<BarcodeScanner onScanResult={handleScanResult} />
+			</div>
 		</AuthenticatedPage>
 	)
 }
 
-export default ShowQrPage
+export default QrPage

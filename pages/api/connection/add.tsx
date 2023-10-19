@@ -2,7 +2,7 @@
 
 // @dev todo
 
-import { pool } from '../config'
+import prisma from '@/lib/prisma'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
@@ -18,10 +18,12 @@ export default async function handler(
 	const connectionCode = Math.floor(100000 + Math.random() * 900000)
 
 	try {
-		await pool.query(
-			'INSERT INTO fundconnection (connection_code, privy_uuid) VALUES ($1, $2)',
-			[connectionCode, privyuuid]
-		)
+		const connection = await prisma.fundconnection.create({
+			data: {
+				connection_code: connectionCode.toString(),
+				privy_uuid: privyuuid,
+			},
+		})
 
 		return res.status(200).json({ connectionCode })
 	} catch (error) {

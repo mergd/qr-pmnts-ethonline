@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model connection_Data {
+  connectionid Int      @id
+  expiry       DateTime @db.Date
+  currency     Int?     @default(0)
+  amount       BigInt?  @default(0)
+  fulfilled    Boolean? @default(false)
+  txhash       String?
+  chainid      String?
+
+  @@map("connection Data")
+}
+
+model fundconnection {
+  connection_code String  @id
+  privy_uuid      String?
+}
+
+model fundingsrc {
+  approveamt BigInt?
+  srcaddr    String?
+  privvyuuid String?
+  uuid       String  @id @db.Uuid
+  currency   Int?
+}
+
+model usertable {
+  privyuuid    String  @id
+  useraddr     String? @unique
+  contractuuid String? @unique
+}
+
+model usertxs {
+  txhash    String    @id
+  privyuuid Int
+  chainid   String    @default("8453")
+  amount    BigInt?   @default(0)
+  currency  Int?
+  time      DateTime? @db.Date
+}

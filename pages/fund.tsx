@@ -30,7 +30,7 @@ import { useToast } from '@/components/ui/use-toast'
 
 // Icon imports
 import transfer from 'public/icons/mdi_transfer.png'
-import { Wallet2, ClipboardPaste, ChevronLeft } from 'lucide-react'
+import { Wallet2, ChevronLeft } from 'lucide-react'
 
 // Utility imports
 import { Address, maxUint256, zeroAddress } from 'viem'
@@ -68,7 +68,6 @@ const Fund = () => {
 	const [userPrivyUUID, setUserPrivyUUID] = useState<string>('')
 	const [extWalletChainId, setExtWalletChainId] = useState<number>(0)
 
-	const mockAddr = '0x00000000000000000000000001' as Address
 	const networks = [
 		baseGoerli,
 		mantleTestnet,
@@ -149,7 +148,6 @@ const Fund = () => {
 				{alert}
 
 				<div className='my-2'>
-					<p className='text-gray-600'> Enter Your Connection code</p>
 					<CodeConnect handleSubmit={codeSubmit} />
 				</div>
 			</div>

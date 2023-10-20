@@ -15,10 +15,27 @@ export default async function handler(
 			currency,
 			txhash,
 			setDefault,
-			prevDefault,
+			prevSrcDefault,
 		} = req.body
 		// Set default funding source
 		if (setDefault && srcAddr && privy_uuid && currency) {
+			if (prevSrcDefault) {
+				try {
+					await prisma.fundingsrc.update({
+						where: {
+							privyuuid_srcaddr_currency: {
+								privyuuid: privy_uuid,
+								srcaddr: prevSrcDefault,
+								currency: currency,
+							},
+						},
+						data: { preferred: false },
+					})
+				} catch (error) {
+					// Don't disrupt flow if this fails
+					console.log(error)
+				}
+			}
 			try {
 				await prisma.fundingsrc.update({
 					where: {
@@ -34,24 +51,6 @@ export default async function handler(
 				return res
 					.status(500)
 					.json({ error: 'Failed to update default funding source' })
-			}
-			if (prevDefault) {
-				try {
-					await prisma.fundingsrc.update({
-						where: {
-							privyuuid_srcaddr_currency: {
-								privyuuid: privy_uuid,
-								srcaddr: srcAddr,
-								currency: currency,
-							},
-						},
-						data: { preferred: false },
-					})
-				} catch (error) {
-					return res
-						.status(500)
-						.json({ error: 'Failed to update default funding source' })
-				}
 			}
 		}
 
@@ -114,17 +113,15 @@ export default async function handler(
 		}
 	} else if (req.method === 'GET') {
 		const { privy_uuid, currency } = req.query
-		if (
-			!privy_uuid ||
-			!currency ||
-			typeof privy_uuid !== 'string' ||
-			typeof currency !== 'number'
-		) {
+		// const currency: number = parseInt(_currency as string)
+		let _privyuuid = privy_uuid as string
+		const _currency = parseInt(currency as string)
+		if (isNaN(_currency) || !_privyuuid) {
 			return res.status(400).json({ error: 'Missing privyuuid or currency' })
 		}
 		try {
 			const fundingsrcs = await prisma.fundingsrc.findMany({
-				where: { privyuuid: privy_uuid, currency: currency },
+				where: { privyuuid: _privyuuid, currency: _currency },
 			})
 			return res.status(200).json(fundingsrcs)
 		} catch (error) {

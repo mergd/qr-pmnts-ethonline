@@ -98,6 +98,7 @@ const Fund = () => {
 				width={127}
 				height={127}
 				className='object-contain'
+				alt='transfer'
 			/>
 		</div>
 	)
@@ -105,7 +106,13 @@ const Fund = () => {
 	const header = (
 		<div className='flex  justify-start pl-4 pt-4'>
 			<Link href={'/'}>
-				<Image src={pmnts} width={100} height={30} className='object-contain' />
+				<Image
+					src={pmnts}
+					width={100}
+					height={30}
+					className='object-contain'
+					alt='pmnts logo'
+				/>
 			</Link>
 		</div>
 	)
@@ -289,6 +296,7 @@ const Fund = () => {
 								height={20}
 								width={20}
 								className='-mb-2'
+								alt='currency icon'
 							/>{' '}
 							{currency.name}{' '}
 						</SelectItem>

@@ -24,6 +24,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
+import { useToast } from './ui/use-toast'
+import SelectCurrency from './select-currency'
 import { Address } from 'viem'
 
 type Props = {
@@ -31,6 +33,7 @@ type Props = {
 }
 
 const QrPage = (props: Props) => {
+	const { toast } = useToast()
 	const fixedAmtArr = [10, 50, 100]
 	const [qrData, setQrData] = useState<string>(() =>
 		JSON.stringify({ privyId: props.privyuuid })
@@ -51,7 +54,16 @@ const QrPage = (props: Props) => {
 				})
 				.catch((error) => console.log('Error sharing', error))
 		} else {
-			console.log('Web Share not supported')
+			// Paste to clipboard
+			navigator.clipboard.writeText(
+				`https://pmnts.io/paylink/${encodeURIComponent(qrData)}`
+			)
+
+			// Show toast
+			toast({
+				title: 'Link copied',
+				duration: 1000,
+			})
 		}
 	}
 
@@ -84,35 +96,6 @@ const QrPage = (props: Props) => {
 		</Select>
 	)
 
-	const currencySelect = (
-		<Select onValueChange={(e) => setRequestedCurrency(parseInt(e))}>
-			<SelectTrigger className='w-full'>
-				<SelectValue placeholder={'USD'} />
-			</SelectTrigger>
-			<SelectContent className='bg-slate-50'>
-				<SelectGroup>
-					<SelectLabel>Tokens</SelectLabel>
-					{CURRENCIES.map((currency, index) => (
-						<SelectItem
-							key={index}
-							value={index.toString()}
-							className='no-wrap flex flex-row items-center gap-1'
-						>
-							{' '}
-							<Image
-								src={`/icons/${currency.icon}`}
-								height={20}
-								width={20}
-								className='-mb-2'
-							/>{' '}
-							{currency.name}{' '}
-						</SelectItem>
-					))}
-				</SelectGroup>
-			</SelectContent>
-		</Select>
-	)
-
 	useEffect(() => {
 		!addlData && setQrData(JSON.stringify({ privyId: props.privyuuid }))
 		addlData &&
@@ -130,6 +113,7 @@ const QrPage = (props: Props) => {
 			<div className='mb-2 mt-2 flex flex-row gap-2'>
 				{fixedAmtArr.map((amt, index) => (
 					<Button
+						key={index}
 						className={` w-full border-2 ${
 							requestedAmount === amt && !showCustomAmt
 								? 'bg-blue-600 text-white'
@@ -162,7 +146,7 @@ const QrPage = (props: Props) => {
 						onChange={(e) => setRequestedAmount(parseInt(e.target.value))}
 					/>
 				)}
-				{currencySelect}
+				<SelectCurrency handleCurrency={setRequestedCurrency} />
 			</div>
 		</div>
 	)

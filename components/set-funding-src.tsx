@@ -9,17 +9,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
+
 import { Address, formatEther } from 'viem'
 import { usePrivy } from '@privy-io/react-auth'
 
 type Props = {
 	handleFundingSource: (fundingSource: number) => void
 	currency: number
+	setDefault?: boolean
 }
 
 type FundingSource = {
-	id: number
 	address: Address
 	isDefault: boolean
 	amount: string // Convert bi to number
@@ -28,22 +28,27 @@ type FundingSource = {
 function SelectFundingSource(props: Props) {
 	const { user } = usePrivy()
 	const [fundingSources, setFundingSources] = useState<FundingSource[]>([])
+	const [requestedFundingSource, setRequestedFundingSource] =
+		useState<number>(0)
+	// @dev todo track userbalance stored within the pmnts contract
+
 	const checkFundingSources = async () => {
 		if (!user) return
-		const sources = await fetch(
-			`/api/fundAddr?privyuuid=${user.id}&currency=${props.currency}`
+
+		await fetch(
+			`/api/fundAddr?privy_uuid=${user.id}&currency=${props.currency}`
 		)
 			.then((res) => res.json())
 			.then((data) => {
-				let fundingSourceArr: FundingSource[] = []
-				for (const source of data) {
-					fundingSourceArr.push({
-						id: source.id,
-						address: source.address,
-						isDefault: source.isDefault,
-						amount: formatEther(source.amount),
-					})
+				if (!data) {
+					console.log('Fetch result is null')
+					return
 				}
+				let fundingSourceArr: FundingSource[] = data.map((source: any) => ({
+					address: source.address,
+					isDefault: source.isDefault,
+					amount: formatEther(source.amount),
+				}))
 				// Sort array, set Default funding source to first element
 				fundingSourceArr = fundingSourceArr.sort((a, b) => {
 					if (a.isDefault) return -1
@@ -53,23 +58,63 @@ function SelectFundingSource(props: Props) {
 				setFundingSources(fundingSourceArr)
 			})
 	}
+	// Set new default funding source
+	const handleSetDefault = async () => {
+		if (!user) return
+		await fetch(`/api/fundAddr`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				privyuuid: user.id,
+				address: fundingSources[requestedFundingSource].address,
+				isDefault: true,
+				prevSrcDefault: fundingSources[0].address,
+			}),
+		})
+	}
 
 	useEffect(() => {
 		checkFundingSources()
-	}, [])
+	}, [fundingSources])
 
-	return (
-		<Select>
-			<Label>Funding Source</Label>
+	const fundingSrcList = (
+		<Select
+			onValueChange={(e) => {
+				setRequestedFundingSource(parseInt(e))
+			}}
+		>
 			<SelectTrigger className='w-[180px]'>
-				<SelectValue placeholder={` ${fundingSources}`} />
+				<SelectValue placeholder={` ${fundingSources[0]}`} />
 			</SelectTrigger>
 			<SelectContent>
 				<SelectGroup>
 					<SelectLabel>Funding Source</SelectLabel>
+					{fundingSources.map((fundingSource, index) => (
+						<SelectItem key={index} value={index.toString()}>
+							{' '}
+							{fundingSource.address.substring(3, 7)}{' '}
+							{props.setDefault && (
+								<p onClick={handleSetDefault}>Set Default?</p>
+							)}{' '}
+						</SelectItem>
+					))}
 				</SelectGroup>
 			</SelectContent>
 		</Select>
+	)
+
+	return (
+		<>
+			{fundingSources.length > 0 ? (
+				fundingSrcList
+			) : (
+				<div className='rounded-md border border-red-100 px-2 py-2 text-slate-700'>
+					No funding Sources found for this currency
+				</div>
+			)}
+		</>
 	)
 }
 

@@ -55,24 +55,24 @@ const BlogGatedPage = () => {
 						As a consequence people who dislike Bitcoin truly ARE idiots- of
 						course they wouldn&apos;t appreciate, for instance, the brilliance
 						in Satoshi&apos;s brilliant programming method - the “Blockchain,”
-						which itself is a cryptic reference to Haber and Stornetta's Merkle
-						trees. <br />
+						which itself is a cryptic reference to Haber and Stornetta&apos;s
+						Merkle trees. <br />
 						I&apos;m smirking right now just imagining one of those addlepated
 						simpletons scratching their heads in confusion as our lord and
-						savior's genius wit unfolds itself on their computer screens. What
-						fools.. how I pity them. 😂 And yes, by the way, i DO have a Bitcoin
-						tattoo. And no, you cannot see it. It&apos;s for the ladies&apos;
-						eyes only- and even then they have to demonstrate that they&apos;re
-						within 5 IQ points of my own (preferably lower) beforehand. Nothin
-						personnel kid 😎
+						savior&apos;s genius wit unfolds itself on their computer screens.
+						What fools.. how I pity them. 😂 And yes, by the way, i DO have a
+						Bitcoin tattoo. And no, you cannot see it. It&apos;s for the
+						ladies&apos; eyes only- and even then they have to demonstrate that
+						they&apos;re within 5 IQ points of my own (preferably lower)
+						beforehand. Nothin personnel kid 😎
 					</span>
 				</div>
 				<div className='col-span-1'>
 					<Card>
 						<CardContent>
 							<CardHeader>Example pmnts blog</CardHeader>
-							This is my very important blog, if you'd like to support my work,
-							mint an NFT, or send me a tip.
+							This is my very important blog, if you&apos;d like to support my
+							work, mint an NFT, or send me a tip.
 						</CardContent>
 					</Card>
 				</div>

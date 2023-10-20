@@ -28,7 +28,7 @@ const OnboardPage = () => {
 					{' '}
 					Pay friends, pay for things online, and more.
 					<br />
-					We've set up an account just for you.
+					We&apos;ve set up an account just for you.
 					<br />
 					<br />
 					To get started, set up a funding source.

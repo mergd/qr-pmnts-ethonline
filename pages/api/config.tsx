@@ -13,10 +13,10 @@ export const account = privateKeyToAccount(process.env.DEPLOYER_KEY as Address)
 export const walletClient = createWalletClient({
 	account,
 	chain: baseGoerli,
-	transport: http(process.env.BASE_GOERLI_RPC),
+	transport: http('https://goerli.base.org'),
 })
 
 export const publicClient = createPublicClient({
 	chain: baseGoerli,
-	transport: http(process.env.BASE_GOERLI_RPC),
+	transport: http('https://goerli.base.org'),
 })

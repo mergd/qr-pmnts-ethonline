@@ -2,6 +2,8 @@
 
 pmnts dapp allows for people to create and send payments on a slick PWA interface.
 
+Bootstrapped with the privy PWA template.
+
 This is a template progressive web app (PWA) built with [Privy](https://www.privy.io/), [Viem](https://viem.sh/), [NextPWA](https://www.npmjs.com/package/next-pwa), and [TailwindCSS](https://tailwindcss.com/). All transactions are sent on the [Base](https://base.org/) Goerli testnet.
 
 ## Points of Interest

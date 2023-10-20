@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"scripts": {
 		"dev": "next dev -p 3004",
-		"build": "next build --legacy-peer-deps",
+		"build": "next build ",
 		"start": "next start -p 3004",
 		"lint": "next lint",
 		"format": "eslint \"components/**/*.{ts,tsx,js,jsx}\" \"pages/**/*.{ts,tsx,js,jsx}\" --fix && prettier --write \"components/**/*.{ts,tsx,js,jsx}\" \"pages/**/*.{ts,tsx,js,jsx}\""

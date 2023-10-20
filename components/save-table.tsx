@@ -27,9 +27,9 @@ export function SaveTable(Props: props) {
 	return (
 		<Accordion type='single' collapsible className='w-full'>
 			{YieldData.map((data, currencyIdx) => (
-				<AccordionItem value={data.id.toString()}>
+				<AccordionItem key={currencyIdx} value={data.id.toString()}>
 					<AccordionTrigger>
-						<div className='flex flex-row gap-1 justify-between items-center'>
+						<div className='flex flex-row items-center justify-between gap-1'>
 							<Image
 								src={`/icons/${data.icon}`}
 								width={20}
@@ -52,13 +52,16 @@ export function SaveTable(Props: props) {
 						<br />
 						{data.description}
 						<br />
-						<hr className='mt-1 mb-2' />
+						<hr className='mb-2 mt-1' />
 						{data.yields.map((yieldData, yieldIdx) => (
 							<div
-								className={`flex flex-row gap-0 justify-between`}
+								key={yieldIdx}
+								className={`flex flex-row justify-between gap-0`}
 								id={yieldIdx.toString()}
 								onClick={() => {
-									setSelectedId(data.yields[yieldIdx].yield_id + data.id)
+									setSelectedId(
+										data.id + data.yields[yieldIdx].yield_id.toString()
+									)
 									Props.handleSelected(
 										data.yields[yieldIdx].yieldAddress,
 										currencyIdx,
@@ -68,14 +71,15 @@ export function SaveTable(Props: props) {
 							>
 								<div
 									className={`${
-										selectedId === data.yields[yieldIdx].yield_id + data.id
-											? 'text-slate-100 bg-blue-700 rounded-md px-1'
+										selectedId ===
+										data.id + data.yields[yieldIdx].yield_id.toString()
+											? 'rounded-md bg-blue-700 px-1 text-slate-100'
 											: ''
 									}`}
 								>
 									{yieldData.name}
 								</div>
-								<span className='justify-end !important'>
+								<span className='!important justify-end'>
 									{' '}
 									{yieldData.apy}{' '}
 								</span>

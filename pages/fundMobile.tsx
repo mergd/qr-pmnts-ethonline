@@ -12,7 +12,7 @@ import { useRouter } from 'next/router'
 import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
 
-const fundMobile = () => {
+function FundMobile() {
 	const { toast } = useToast()
 	const { user } = usePrivy()
 	const privyuuid = user?.id
@@ -63,11 +63,11 @@ const fundMobile = () => {
 						<p className='text-slate-700'>
 							{' '}
 							Open{' '}
-							<span className='underline-offset-2 font-bold hover:text-slate-600'>
+							<span className='font-bold underline-offset-2 hover:text-slate-600'>
 								<Link href='/fund'>this link</Link>{' '}
 							</span>
 							on your computer, and enter in this connection code: <br />
-							<span className='text-slate-800 text-sm'>(Tap to copy)</span>
+							<span className='text-sm text-slate-800'>(Tap to copy)</span>
 						</p>
 						{connectionCode && (
 							<h1
@@ -85,4 +85,4 @@ const fundMobile = () => {
 	)
 }
 
-export default fundMobile
+export default FundMobile

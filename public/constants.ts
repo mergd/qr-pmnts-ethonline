@@ -3,6 +3,9 @@ import { Address } from 'viem'
 export const PMNTS_ADDRESS =
 	'0x5c90c2f1022f8c67ed5b162c2754ce8da9a66e3a' as Address
 
+export const deployerAddr =
+	'0x5B61cE87191064291B2a46376d4787AB6Fe24d65' as Address
+
 export const CURRENCIES = [
 	{
 		id: '1',
@@ -42,7 +45,7 @@ const addr1 = '0x000000000000000000000001' as Address
 
 export const YieldData = [
 	{
-		id: '1',
+		id: 1,
 		name: 'USD',
 		currency_id: 0,
 		apy: '5.00%',
@@ -52,7 +55,7 @@ export const YieldData = [
 		description: 'Backed by US Dollars in a bank account.',
 		yields: [
 			{
-				yield_id: '1',
+				yield_id: 0,
 				name: 'Maker - DSR',
 				apy: '5.00%',
 				deposited: '0.00',
@@ -60,8 +63,7 @@ export const YieldData = [
 				yieldAddress: addr1,
 			},
 			{
-				yield_id: '2',
-
+				yield_id: 1,
 				name: 'Compound - cUSDC',
 				apy: '3.00%',
 				deposited: '0.00',
@@ -72,7 +74,7 @@ export const YieldData = [
 		address: addr1,
 	},
 	{
-		id: '2',
+		id: 2,
 		name: 'WETH',
 		currency_id: 1,
 		apy: '10.00%',
@@ -83,7 +85,7 @@ export const YieldData = [
 			'Backed by Ethereum in a bank account.  Please note Uniswap yield strategies incur a 0.1% withdraw fee.',
 		yields: [
 			{
-				yield_id: '1',
+				yield_id: 0,
 
 				name: 'WETH-STETH LP - Uniswap',
 				apy: '10.00%',
@@ -92,7 +94,7 @@ export const YieldData = [
 				yieldAddress: addr1,
 			},
 			{
-				yield_id: '2',
+				yield_id: 1,
 
 				name: 'WETH-STETH LP - Uniswap',
 				apy: '5.00%',
@@ -115,7 +117,7 @@ export const YieldData = [
 			'Backed by APEs in a jungle and on Twitter, the premier currency of the metaverse.',
 		yields: [
 			{
-				yield_id: '1',
+				yield_id: 0,
 
 				name: 'APE Staking',
 				apy: '30.00%',

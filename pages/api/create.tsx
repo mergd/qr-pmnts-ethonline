@@ -20,33 +20,38 @@ export default async function handler(
 		}
 
 		try {
-			const { request, result } = await publicClient.simulateContract({
-				address: PMNTS_ADDRESS,
-				abi: pmntsABI,
-				functionName: 'create',
-				args: [address],
+			// const { request, result } = await publicClient.simulateContract({
+			// 	address: PMNTS_ADDRESS,
+			// 	abi: pmntsABI,
+			// 	functionName: 'create',
+			// 	args: [address],
+			// })
+			console.log('about to kms')
+			const block = await publicClient.getBlock().catch((err) => {
+				console.log(' kms rn', err)
 			})
 
-			const response = await walletClient.sendTransaction(request)
-			const returnedString = result.toString()
+			// const response = await walletClient.sendTransaction(request)
+			// const returnedString = result.toString()
 
-			await prisma.usertable.create({
-				data: {
-					privyuuid: privyuuid,
-					useraddr: address,
-					contractuuid: returnedString,
-				},
-			})
-			// Log creation tx
-			await prisma.usertxs.create({
-				data: {
-					txhash: response,
-					privyuuid: privyuuid,
-					amount: 0,
-					currency: 0,
-					time: new Date(),
-				},
-			})
+			// await prisma.usertable.create({
+			// 	data: {
+			// 		privyuuid: privyuuid,
+			// 		useraddr: address,
+			// 		contractuuid: returnedString,
+			// 	},
+			// })
+			// // Log creation tx
+			// await prisma.usertxs.create({
+			// 	data: {
+			// 		txhash: response,
+			// 		privyuuid: privyuuid,
+			// 		amount: 0,
+			// 		currency: 0,
+			// 		time: new Date(),
+			// 	},
+			// })
+			const response = '1223'
 
 			return res.status(200).json({ response })
 		} catch (error) {

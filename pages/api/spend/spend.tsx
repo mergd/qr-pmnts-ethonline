@@ -1,7 +1,8 @@
 // FILEPATH: /pages/api/spend.ts
 
 import { NextApiRequest, NextApiResponse } from 'next'
-import { pool, walletClient, publicClient } from '../config'
+import { walletClient, publicClient } from '../config'
+import prisma from '@/lib/prisma'
 import pmntsABI from 'public/pmntsABI'
 import { PMNTS_ADDRESS } from '@/public/constants'
 import { CURRENCIES } from '@/public/constants'
@@ -24,18 +25,20 @@ export default async function handler(
 	}
 
 	try {
-		const res0 = await pool.query(
-			'SELECT useraddr, contractuuid FROM usertable WHERE privyuuid = $1',
-			[requesterPrivyuuid]
-		)
-		const contractUuid = res0.rows[0].contractuuid
+		const res0 = await prisma.usertable.findUnique({
+			where: {
+				privyuuid: requesterPrivyuuid,
+			},
+		})
+		if (!res0 || !res0.contractuuid)
+			return res.status(404).json({ error: 'No user found for this uuid' })
 
 		const { request } = await publicClient.simulateContract({
 			address: PMNTS_ADDRESS,
 			abi: pmntsABI,
 			functionName: 'send',
 			args: [
-				contractUuid,
+				BigInt(res0.contractuuid),
 				// If recipientuuid is not provided, use recipientAddr
 				recipientuuid ? recipientuuid : recipientAddr,
 				CURRENCIES[currency].address,
@@ -45,11 +48,7 @@ export default async function handler(
 		})
 
 		const hash = await walletClient.sendTransaction(request)
-
-		await pool.query(
-			'INSERT INTO usertxs(txhash privyuuid chainid amount currency time) VALUES ($1, $2, $3, $4, $5, $6)',
-			[hash, requesterPrivyuuid, 8453, amt, currency, new Date()]
-		)
+		// Commit this to usertxs db
 
 		return res.status(200)
 	} catch (error) {

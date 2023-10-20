@@ -139,6 +139,25 @@ const Fund = () => {
 		}
 	}
 
+	const onFundAddr = async () => {
+		const response = await fetch('/api/fundAddr', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				privy_uuid: userPrivyUUID,
+				approveAmt: approveAmt,
+				srcAddr: externalWallet?.address,
+				currency: requestedCurrency,
+				txhash: txHash,
+			}),
+		})
+		if (!response.ok) {
+			console.log(response.status, response.statusText)
+		}
+	}
+
 	const connectCard = (
 		<Card className='max-w-[400] overflow-hidden rounded-lg shadow-lg'>
 			<CardTitle className=' p-4 font-serif'>
@@ -198,6 +217,8 @@ const Fund = () => {
 			const _txHash = await walletClient.sendTransaction(request)
 
 			setTxHash(_txHash)
+			// Update backend
+			onFundAddr()
 		} catch (e) {
 			console.error('Transfer failed with error ', e)
 		}
@@ -222,15 +243,6 @@ const Fund = () => {
 			],
 		})
 	}
-
-	// useEffect(() => {
-	// 	async function fetchChainId() {
-	// 		if (!externalWallet) return
-	// 		const provider = await externalWallet.getEthereumProvider()
-	// 		setExtWalletChainId(await provider.request({ method: 'eth_chainId' }))
-	// 	}
-	// 	fetchChainId()
-	// }, [requestedNetwork, externalWallet])
 
 	const onDisconnect = async () => {
 		if (!externalWallet) return

@@ -1,15 +1,18 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import AuthenticatedPage from '@/components/authenticated-page'
-import { usePrivy } from '@privy-io/react-auth'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import pmnts from 'public/pmnts-icon.png'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
 import Link from 'next/link'
 const OnboardPage = () => {
+	const { toast } = useToast()
+
 	return (
 		<AuthenticatedPage>
-			<div className='flex flex-col items-center h-screen'>
+			<div className='flex h-screen flex-col items-center'>
 				<Image
 					src={pmnts}
 					alt='PMNTS'
@@ -30,13 +33,13 @@ const OnboardPage = () => {
 					<br />
 					To get started, set up a funding source.
 				</p>
-				<Button className='bg-blue-700 text-slate-200 mt-4'>
+				<Button className='mt-4 bg-blue-700 text-slate-200'>
 					<Link href={'/fundMobile'}> Fund </Link>
 				</Button>
 				<Button variant='link' className='mt-4'>
 					<Link
 						href={'/dashboard'}
-						className='color-gray-700 underline text-sm'
+						className='color-gray-700 text-sm underline'
 					>
 						Skip
 					</Link>

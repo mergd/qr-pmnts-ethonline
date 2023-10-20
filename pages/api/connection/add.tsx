@@ -18,7 +18,7 @@ export default async function handler(
 	const connectionCode = Math.floor(100000 + Math.random() * 900000)
 
 	try {
-		const connection = await prisma.fundconnection.create({
+		await prisma.fundconnection.create({
 			data: {
 				connection_code: connectionCode.toString(),
 				privy_uuid: privyuuid,

@@ -7,16 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model connection_Data {
-  connectionid Int      @id
-  expiry       DateTime @db.Date
-  currency     Int?     @default(0)
-  amount       BigInt?  @default(0)
-  fulfilled    Boolean? @default(false)
-  txhash       String?
-  chainid      String?
-
-  @@map("connection Data")
+model connectiondata {
+  connectionid   Int      @id
+  expiry         DateTime @db.Date
+  currency       Int?     @default(0)
+  amount         BigInt?  @default(0)
+  description    String?
+  additionalData String? // JSON data of additional data
+  fulfilled      Boolean? @default(false)
+  txhash         String?
 }
 
 model fundconnection {
@@ -27,9 +26,13 @@ model fundconnection {
 model fundingsrc {
   approveamt BigInt?
   srcaddr    String?
-  privvyuuid String?
-  uuid       String  @id @db.Uuid
+  privyuuid  String?
+  uuid       String?
   currency   Int?
+  preferred  Boolean? @default(false)
+  id         String   @id @default(uuid())
+
+  @@unique([privyuuid, srcaddr, currency], name: "privyuuid_srcaddr_currency")
 }
 
 model usertable {
@@ -39,10 +42,11 @@ model usertable {
 }
 
 model usertxs {
-  txhash    String    @id
-  privyuuid Int
-  chainid   String    @default("8453")
-  amount    BigInt?   @default(0)
-  currency  Int?
-  time      DateTime? @db.Date
+  txhash      String    @id
+  privyuuid   Int
+  amount      BigInt?   @default(0)
+  type        String?
+  description String?
+  currency    Int?
+  time        DateTime? @db.Date
 }

@@ -12,17 +12,38 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import {
-	Menubar,
-	MenubarMenu,
-	MenubarSeparator,
-	MenubarTrigger,
-} from '@/components/ui/menubar'
-
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import { useToast } from '@/components/ui/use-toast'
 import { TableDemo } from '@/components/txns-table'
-
+import QrPage from '@/components/create-qr'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+import { useState } from 'react'
 const Dashboard = () => {
+	const { toast } = useToast()
+
+	const [scanResult, setScanResult] = useState<string>('0')
+
+	const QrScanner = dynamic(() => import('@/components/qrscan'), {
+		ssr: false,
+	})
+
+	const handleScanResult = (data: string) => {
+		console.log(data)
+		setScanResult(data)
+	}
+
+	const currentHour = new Date().getHours()
+	let greeting
+
+	if (currentHour >= 0 && currentHour < 12) {
+		greeting = 'gm'
+	} else if (currentHour >= 12 && currentHour < 19) {
+		greeting = 'ga'
+	} else {
+		greeting = 'gn'
+	}
 	const pointsbanner = (
 		<Alert className='my-4'>
 			<GiftIcon className='mb-2 h-6 w-6' />
@@ -42,58 +63,61 @@ const Dashboard = () => {
 	return (
 		<AuthenticatedPage>
 			<Section>
-				<h1 className='my-4 font-serif text-3xl font-bold'>gm</h1>
-				<Menubar className='h-24 justify-center rounded-lg'>
-					<MenubarMenu>
-						<MenubarTrigger className=' hover:bg-gray-200'>
-							<Link href={'/qr'}>
-								<div>
-									<QrCode className='h-16 w-16' strokeWidth={1} />
-									<p className='text-center text-xs font-bold uppercase'>
-										{' '}
-										qr{' '}
-									</p>
-								</div>
-							</Link>
-						</MenubarTrigger>
-						<MenubarSeparator />
-						<MenubarTrigger className=' hover:bg-gray-200'>
-							<Link href={'/scan'}>
-								<div>
-									<ScanBarcodeIcon className='h-16 w-16' strokeWidth={1} />
-									<p className='text-center text-xs font-bold uppercase'>
-										{' '}
-										scan{' '}
-									</p>
-								</div>
-							</Link>
-						</MenubarTrigger>
-						<MenubarSeparator />
-						<MenubarTrigger className=' hover:bg-gray-200'>
-							<Link href={'/save'}>
-								<div>
-									<PiggyBankIcon className='h-16 w-16' strokeWidth={1} />
-									<p className='text-center text-xs font-bold uppercase'>
-										{' '}
-										save{' '}
-									</p>
-								</div>
-							</Link>
-						</MenubarTrigger>
-						<MenubarSeparator />
-						<MenubarTrigger className=' hover:bg-gray-200'>
-							<Link href={'/wallet'}>
-								<div>
-									<Wallet className='h-16 w-16' strokeWidth={1} />
-									<p className='text-center text-xs font-bold uppercase'>
-										{' '}
-										wallet{' '}
-									</p>
-								</div>
-							</Link>
-						</MenubarTrigger>
-					</MenubarMenu>
-				</Menubar>
+				<h1 className='my-4 font-serif text-3xl font-bold'>{greeting}, </h1>
+				<div className=' flex flex-row justify-center rounded-lg border border-gray-200 bg-zinc-50 '>
+					<div className=' rounded-lg hover:bg-gray-200 '>
+						<Dialog>
+							<DialogTrigger>
+								<ScanBarcodeIcon
+									className='h-16 w-16'
+									strokeWidth={1}
+									color='#27272a'
+								/>
+								<p className='text-center text-xs font-bold uppercase'>
+									{' '}
+									scan{' '}
+								</p>
+							</DialogTrigger>
+
+							<QrScanner onScanResult={handleScanResult} />
+						</Dialog>
+					</div>
+					<div className=' rounded-lg hover:bg-gray-200'>
+						<Dialog>
+							<DialogTrigger>
+								<QrCode className='h-16 w-16' strokeWidth={1} color='#27272a' />
+								<p className='text-center text-xs font-bold uppercase'> qr </p>
+							</DialogTrigger>
+							{user && <QrPage privyuuid={user.id} />}
+						</Dialog>
+					</div>
+					<div className=' rounded-lg hover:bg-gray-200'>
+						<Link href={'/save'}>
+							<div>
+								<PiggyBankIcon
+									className='h-16 w-16'
+									strokeWidth={1}
+									color='#27272a'
+								/>
+								<p className='text-center text-xs font-bold uppercase'>
+									{' '}
+									save{' '}
+								</p>
+							</div>
+						</Link>
+					</div>
+					<div className=' rounded-lg hover:bg-gray-200'>
+						<Link href={'/wallet'}>
+							<div>
+								<Wallet className='h-16 w-16' strokeWidth={1} color='#27272a' />
+								<p className='text-center text-xs font-bold uppercase'>
+									{' '}
+									wallet{' '}
+								</p>
+							</div>
+						</Link>
+					</div>
+				</div>
 			</Section>
 			{pointsbanner}
 			{TableDemo()}

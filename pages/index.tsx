@@ -1,9 +1,10 @@
-import { useLogin, usePrivy } from '@privy-io/react-auth'
+import { useLogin, usePrivy, useWallets } from '@privy-io/react-auth'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { isAndroid } from 'react-device-detect'
-
+import { useToast } from '@/components/ui/use-toast'
+import Link from 'next/link'
 import {
 	Menubar,
 	MenubarContent,
@@ -17,10 +18,58 @@ import {
 import { QrCode, ScanBarcode, BadgeDollarSign, PiggyBank } from 'lucide-react'
 
 const Index = () => {
+	const { toast } = useToast()
 	const [isInstalled, setIsInstalled] = useState(false)
 	const [installationPrompt, setInstallationPrompt] = useState<any>()
 	const router = useRouter()
-	const { ready, authenticated } = usePrivy()
+	const { ready, authenticated, user } = usePrivy()
+	const { wallets } = useWallets()
+	// Create wallet if they are new
+	const createAccount = async () => {
+		const embeddedWallet = wallets.find(
+			(wallet) => wallet.walletClientType === 'privy'
+		)
+
+		const response = await fetch('/api/create', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				address: embeddedWallet?.address,
+				privyuuid: user?.id,
+			}),
+		})
+
+		if (response.status === 200) {
+			toast({
+				title: 'Account Created!',
+				description: `${(
+					<div>
+						<Link href={`https://goerli.basescan.org/${response.body}`}>
+							{' '}
+							Transaction Hash
+						</Link>
+
+						<p> +50 points!</p>
+					</div>
+				)}`,
+			})
+			const json = await response.json()
+			console.log(json)
+			return Promise.resolve()
+		} else {
+			toast({
+				title: 'Account Creation failed',
+				description: 'Please try again later.',
+				variant: 'destructive',
+			})
+			const json = await response.json()
+			console.log(json)
+			return Promise.reject()
+		}
+	}
+
 	const { login } = useLogin({
 		// Set up an `onComplete` callback to run when `login` completes
 		onComplete(user, isNewUser, wasPreviouslyAuthenticated) {
@@ -31,7 +80,11 @@ const Index = () => {
 			})
 
 			if (isNewUser) {
-				router.push('/onboard')
+				createAccount().then(() => {
+					setTimeout(() => {
+						router.push('/onboard')
+					}, 2000) // 2 seconds delay
+				})
 			} else {
 				router.push('/dashboard')
 			}

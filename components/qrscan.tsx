@@ -15,9 +15,9 @@ type Props = {
 	onScanResult: (result: string) => void
 }
 
-const BarcodeScanner = (props: Props) => {
+const QrScanner = (props: Props) => {
 	const [result, setResult] = useState('')
-	const [isPlaying, setIsPlaying] = useState(true)
+	const [isPlaying, setIsPlaying] = useState(false)
 	const [error, setError] = useState('')
 
 	const onQRscan = (result: string) => {
@@ -26,6 +26,7 @@ const BarcodeScanner = (props: Props) => {
 	}
 
 	const { ref } = useZxing({
+		paused: !isPlaying,
 		onDecodeResult(result) {
 			onQRscan(result.getText())
 		},
@@ -44,17 +45,17 @@ const BarcodeScanner = (props: Props) => {
 
 	return (
 		<>
-			<DialogContent className='sm:max-w-[425px] bg-blue-100'>
+			<DialogContent className='bg-slate-100 sm:max-w-[425px]'>
 				<DialogHeader>
 					<DialogTitle>Scan a pmnt QR code</DialogTitle>
-					<div className='md-rounded flex h-[90%] w-[90%] flex-col items-center justify-center'>
-						<div
-							className={`relative ${
-								isPlaying ? '' : 'bg-black bg-opacity-50'
-							} z-9`}
-						>
-							<video className='z-0 h-96 w-96 rounded-md bg-cover' ref={ref} />
-						</div>
+					<div className='md-rounded flex flex-col items-center justify-center'>
+						{!isPlaying && (
+							<div className='top-50 left-50 -translate-x-50 -translate-y-50 absolute transform rounded-lg bg-slate-400 px-8 py-6 text-center text-slate-200'>
+								<p>Tap on the button below to enable the camera.</p>
+								<p>The camera is paused.</p>
+							</div>
+						)}
+						<video className='z-0 h-96 w-96 rounded-md bg-cover' ref={ref} />
 					</div>
 
 					{error === null ? (
@@ -75,10 +76,10 @@ const BarcodeScanner = (props: Props) => {
 					</Button>
 				</DialogHeader>
 				<DialogFooter>
-					<Button type='submit'>Save changes</Button>
+					{/* <Button type='submit'>Save changes</Button> */}
 				</DialogFooter>
 			</DialogContent>
 		</>
 	)
 }
-export default BarcodeScanner
+export default QrScanner

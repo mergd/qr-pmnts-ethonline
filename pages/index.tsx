@@ -29,6 +29,8 @@ const Index = () => {
 		const embeddedWallet = wallets.find(
 			(wallet) => wallet.walletClientType === 'privy'
 		)
+		console.log('privy embedded wallet addr', embeddedWallet?.address)
+		console.log('privyUuid ', user?.id)
 
 		const response = await fetch('/api/create', {
 			method: 'POST',
@@ -44,16 +46,15 @@ const Index = () => {
 		if (response.status === 200) {
 			toast({
 				title: 'Account Created!',
-				description: `${(
+				description: (
 					<div>
 						<Link href={`https://goerli.basescan.org/${response.body}`}>
-							{' '}
 							Transaction Hash
 						</Link>
 
 						<p> +50 points!</p>
 					</div>
-				)}`,
+				),
 			})
 			const json = await response.json()
 			console.log(json)

@@ -120,15 +120,20 @@ const Fund = () => {
 	const codeSubmit = async (code: Array<string>) => {
 		const concatCode = code.join('')
 		console.log(concatCode)
-
-		const response = await fetch('/api/connection/get', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ connectioncode: code }),
-		})
-		console.log(response.status)
+		let response
+		try {
+			response = await fetch('/api/connection/get', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ connectionCode: code }),
+			})
+			console.log(response.status)
+		} catch (e) {
+			console.log()
+		}
+		if (!response) return
 
 		if (response.status == 200) {
 			const json = await response.json()
@@ -136,8 +141,6 @@ const Fund = () => {
 			setUserPrivyUUID(json.privyuuid)
 			setRetrievedAddr(json.useraddr)
 		} else {
-			console.log(response.status, response.statusText)
-
 			toast({
 				title: 'The code is invalid, or there was a backend error',
 				description: `${response.status}: ${response.statusText}`,

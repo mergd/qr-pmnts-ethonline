@@ -10,7 +10,7 @@ export const CURRENCIES = [
 	{
 		id: '1',
 		name: 'USD',
-		symbol: '$',
+		symbol: 'USDC',
 		address: '0x5c90c2f1022f8c67ed5b162c2754ce8da9a66e3a' as Address,
 		decimals: 18,
 		icon: 'usdc.png',

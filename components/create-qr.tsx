@@ -9,11 +9,10 @@ import {
 	DialogFooter,
 	DialogTrigger,
 } from '@/components/ui/dialog'
+import { Badge } from './ui/badge'
 
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
-import QRCode from 'react-qr-code'
-import { CURRENCIES } from '@/public/constants'
 import { Input } from '@/components/ui/input'
 import {
 	Select,
@@ -26,22 +25,113 @@ import {
 } from '@/components/ui/select'
 import { useToast } from './ui/use-toast'
 import SelectCurrency from './select-currency'
-import { Address } from 'viem'
 
+import QR from './qr'
+
+import { CURRENCIES } from '@/public/constants'
 type Props = {
 	privyuuid: string
+	currencyToPay?: number
+	amountToPay?: number
+	justPay?: boolean
+	handleFulfilled?: () => void
 }
 
 const QrPage = (props: Props) => {
 	const { toast } = useToast()
 	const fixedAmtArr = [10, 50, 100]
+	const [fulfilled, setFulfilled] = useState(false)
+	const [requestId, setRequestId] = useState<string>()
 	const [qrData, setQrData] = useState<string>(() =>
 		JSON.stringify({ privyId: props.privyuuid })
 	)
 	const [addlData, setAddlData] = useState<Boolean>(false)
-	const [requestedCurrency, setRequestedCurrency] = useState<number>(0)
-	const [requestedAmount, setRequestedAmount] = useState<number>(0)
+	const [requestedCurrency, setRequestedCurrency] = useState<number>(() =>
+		props.currencyToPay ? props.currencyToPay : 0
+	)
+	const [requestedAmount, setRequestedAmount] = useState<number>(() =>
+		props.amountToPay ? props.amountToPay : 0
+	)
 	const [showCustomAmt, setShowCustomAmt] = useState<Boolean>(false)
+
+	// For in app p2p payments
+	useEffect(() => {
+		!addlData && setQrData(JSON.stringify({ privyId: props.privyuuid }))
+		addlData &&
+			setQrData(
+				JSON.stringify({
+					privyId: props.privyuuid,
+					currency: requestedCurrency,
+					amount: requestedAmount,
+				})
+			)
+	}, [addlData, requestedCurrency, requestedAmount])
+
+	// For paywall
+	useEffect(() => {
+		// Fetch code and add it
+		if (props.justPay) getPmntCode()
+	}, [props.justPay])
+
+	useEffect(() => {
+		if (requestId) {
+			const eventSource = new EventSource(`/api/spend/request?id=${requestId}`)
+
+			eventSource.onmessage = function (event) {
+				const data = JSON.parse(event.data)
+				if (data.fulfilled) {
+					setFulfilled(true)
+					eventSource.close()
+				}
+			}
+
+			eventSource.onerror = function (event) {
+				console.error('EventSource failed:', event)
+			}
+
+			return () => {
+				eventSource.close()
+			}
+		}
+	}, [requestId])
+
+	useEffect(() => {
+		if (fulfilled) {
+			props.handleFulfilled && props.handleFulfilled()
+		}
+	}, [fulfilled])
+
+	const getPmntCode = async () => {
+		const response = await fetch('/api/spend/request', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				privyuuid: props.privyuuid,
+				currency: requestedCurrency,
+				amount: requestedAmount,
+			}),
+		})
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error('Network response was not ok')
+				}
+				return response.json()
+			})
+			.catch((err) => {
+				console.log(err)
+			})
+		if (!response || !response.body) {
+			console.log('No response')
+		} else {
+			// Append pmnt code to the JSON
+			let data = JSON.parse(qrData)
+			data.pmntCode = response.id
+			setRequestId(response.id)
+			setQrData(JSON.stringify(data))
+		}
+	}
 
 	// @dev todo implement paylink
 	const handleShare = () => {
@@ -96,18 +186,6 @@ const QrPage = (props: Props) => {
 		</Select>
 	)
 
-	useEffect(() => {
-		!addlData && setQrData(JSON.stringify({ privyId: props.privyuuid }))
-		addlData &&
-			setQrData(
-				JSON.stringify({
-					privyId: props.privyuuid,
-					currency: requestedCurrency,
-					amount: requestedAmount,
-				})
-			)
-	}, [addlData, requestedCurrency, requestedAmount])
-
 	const requestOptions = (
 		<div>
 			<div className='mb-2 mt-2 flex flex-row gap-2'>
@@ -117,7 +195,7 @@ const QrPage = (props: Props) => {
 						className={` w-full border-2 ${
 							requestedAmount === amt && !showCustomAmt
 								? 'bg-blue-600 text-white'
-								: 'bg-slate-100 text-slate-700'
+								: 'bg-zinc-100 text-zinc-700'
 						}`}
 						onClick={() => setRequestedAmount(amt)}
 					>
@@ -128,7 +206,7 @@ const QrPage = (props: Props) => {
 					className={` w-full ${
 						showCustomAmt
 							? 'bg-blue-600 text-white'
-							: 'bg-slate-100 text-slate-700'
+							: 'bg-zinc-100 text-zinc-700'
 					}`}
 					onClick={() => setShowCustomAmt(!showCustomAmt)}
 				>
@@ -151,9 +229,49 @@ const QrPage = (props: Props) => {
 		</div>
 	)
 
+	const appPayment = (
+		<>
+			<QR data={qrData} />
+			<div className='flex flex-col gap-2'>
+				{addlData ? requestOptions : null}
+			</div>
+		</>
+	)
+
+	const payWall = (
+		<div className='flex flex-col items-center gap-2'>
+			<QR data={qrData} />
+			<div>
+				<p>
+					{' '}
+					Pay {props.amountToPay}{' '}
+					{props.currencyToPay ? CURRENCIES[0].symbol : ''}{' '}
+				</p>
+			</div>
+			<div>
+				{' '}
+				Status:{' '}
+				{fulfilled ? (
+					<Badge className='bg-blue-500 uppercase text-white'>
+						{' '}
+						Payment Received
+					</Badge>
+				) : (
+					<Badge
+						onClick={() => setFulfilled(!fulfilled)}
+						className='bg-zinc-300 uppercase '
+					>
+						{' '}
+						Pending Payment
+					</Badge>
+				)}{' '}
+			</div>
+		</div>
+	)
+
 	return (
 		<>
-			<DialogContent className='bg-slate-100 '>
+			<DialogContent className='bg-zinc-100 '>
 				<DialogHeader>
 					<DialogTitle className='mr-6 flex flex-row justify-between'>
 						{' '}
@@ -165,27 +283,11 @@ const QrPage = (props: Props) => {
 								color='#808080'
 							/>{' '}
 						</p>
-						{addlOptions}
+						{!props.justPay && addlOptions}
 					</DialogTitle>
 				</DialogHeader>
-				<div
-					style={{
-						height: 'auto',
-						margin: '0 auto',
-						maxWidth: 256,
-						width: '100%',
-					}}
-				>
-					<QRCode
-						size={1024}
-						style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
-						value={qrData}
-						viewBox={`0 0 1024 1024`}
-					/>
-				</div>
-				<div className='flex flex-col gap-2'>
-					{addlData ? requestOptions : null}
-				</div>
+				{!props.justPay && appPayment}
+				{props.justPay && payWall}
 			</DialogContent>
 		</>
 	)

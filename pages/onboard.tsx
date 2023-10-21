@@ -24,7 +24,7 @@ const OnboardPage = () => {
 					Welcome to <span className='font-serif font-bold'> pmnts </span>
 				</h1>
 
-				<p className=''>
+				<p className='pt-2 text-center'>
 					{' '}
 					Pay friends, pay for things online, and more.
 					<br />
@@ -33,7 +33,7 @@ const OnboardPage = () => {
 					<br />
 					To get started, set up a funding source.
 				</p>
-				<Button className='mt-4 bg-blue-700 text-slate-200'>
+				<Button className='mt-4 bg-blue-700 text-white'>
 					<Link href={'/fundMobile'}> Fund </Link>
 				</Button>
 				<Button variant='link' className='mt-4'>

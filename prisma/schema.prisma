@@ -8,8 +8,8 @@ datasource db {
 }
 
 model connectiondata {
-  connectionid   Int      @id
-  expiry         DateTime @db.Date
+  id             String   @id @default(uuid())
+  privyuuid      String?
   currency       Int?     @default(0)
   amount         BigInt?  @default(0)
   description    String?
@@ -42,11 +42,17 @@ model usertable {
 }
 
 model usertxs {
-  txhash      String    @id
-  privyuuid   Int
+  id          String    @id @default(uuid())
+  txhash      String
+  privyuuid   String
   amount      BigInt?   @default(0)
   type        String?
   description String?
   currency    Int?
   time        DateTime? @db.Date
+}
+
+model userPoints {
+  privy_uuid String @id
+  points     Int
 }

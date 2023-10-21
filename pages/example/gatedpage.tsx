@@ -9,19 +9,46 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card'
+import PaywallCard from '@/components/paywallcard'
+import Image from 'next/image'
+import { BadgeDollarSign } from 'lucide-react'
 
 const BlogGatedPage = () => {
+	const [passPaywall, setPassPaywall] = useState<boolean>(false)
+
+	const handlePassPaywall = () => {
+		setPassPaywall(true)
+	}
 	const payWallcard = (
-		<div className='fixed inset-0 z-10 flex items-center justify-center'>
-			<div className='rounded bg-white p-6 shadow-lg'>
-				<h2 className='mb-4 text-2xl'>Paywall</h2>
-				<p>Please subscribe to continue reading.</p>
-				{/* Add your payment form or button here */}
-			</div>
+		<div className='fixed bottom-80 left-60 z-10 flex items-center justify-center '>
+			<PaywallCard
+				modalOpen={passPaywall}
+				privyuuid='test'
+				amountToPay={10}
+				currency={0}
+				handleFulfilled={handlePassPaywall}
+			>
+				<BadgeDollarSign className='h-8 w-8' />
+				<h1 className='text-center text-xl font-semibold'>
+					{' '}
+					Support the author{' '}
+				</h1>
+				<p className='text-center text-sm text-gray-700'>
+					Get access to the full article, and exclusive scoops
+				</p>
+				{/* hehe */}
+				<p
+					onClick={() => {
+						setPassPaywall(!passPaywall)
+					}}
+					className='text-center text-sm text-gray-400'
+				>
+					We are using pmnts to accept payments.
+				</p>
+			</PaywallCard>
 		</div>
 	)
 
-	const [passPaywall, setPassPaywall] = useState<boolean>(false)
 	return (
 		<div className='h-screen px-6 py-8'>
 			<div className='flex flex-row justify-between'>
@@ -40,12 +67,20 @@ const BlogGatedPage = () => {
 					sigh
 					<br />
 					<br />
-					{payWallcard}
+					{!passPaywall && payWallcard}
 					<span className={`${passPaywall ? '' : 'blur-sm'}`}>
 						To be fair, you have to have a very high IQ to understand Bitcoin.
 						Its future applications are extremely subtle, and without a solid
 						grasp of computing and economics most of its possible functions will
 						go over a typical investor&apos;s head.
+						<Image
+							className={`${passPaywall ? 'visible' : 'invisible'}`}
+							src='/images/4.jpg'
+							alt='PMNTS'
+							width={100}
+							height={100}
+						/>
+						<br />
 						<br /> There&apos;s also Sitoshis&apos;s free market outlook, which
 						is deftly woven into his creation- his personal philosophy draws
 						heavily from Robert Malthus, for instance. The shills understand
@@ -57,6 +92,14 @@ const BlogGatedPage = () => {
 						in Satoshi&apos;s brilliant programming method - the “Blockchain,”
 						which itself is a cryptic reference to Haber and Stornetta&apos;s
 						Merkle trees. <br />
+						<Image
+							className={`${passPaywall ? 'visible' : 'invisible'}`}
+							src='/images/sbf.jpg'
+							alt='PMNTS'
+							width={100}
+							height={100}
+						/>
+						<br />
 						I&apos;m smirking right now just imagining one of those addlepated
 						simpletons scratching their heads in confusion as our lord and
 						savior&apos;s genius wit unfolds itself on their computer screens.

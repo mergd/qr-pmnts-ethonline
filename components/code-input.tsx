@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import React, { useEffect, useRef, useState } from 'react'
-
 import { ClipboardPasteIcon } from 'lucide-react'
 type Props = {
 	handleSubmit: (code: Array<string>) => void
@@ -48,9 +47,12 @@ export const CodeConnect = (props: Props) => {
 	return (
 		<div>
 			<div className='flex flex-row items-center  gap-2'>
-				<p className='text-gray-600'> Enter Your Connection code </p>{' '}
-				<div className='bg-gray-100 rounded-md p-1 flex flex-row items-center gap-1'>
-					<ClipboardPasteIcon className=' h-4 w-4' onClick={handlePaste} />
+				<p className='text-gray-600'> Enter Your Code </p>{' '}
+				<div
+					onClick={handlePaste}
+					className='flex flex-row items-center gap-1 rounded-md bg-gray-100 p-1'
+				>
+					<ClipboardPasteIcon className=' h-4 w-4' />
 					<p className='text-gray-600'> Paste </p>
 				</div>
 			</div>

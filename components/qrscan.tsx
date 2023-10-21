@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useZxing } from 'react-zxing'
+import ConfirmTransaction from './confirmation'
 import {
 	Dialog,
 	DialogContent,
@@ -11,13 +12,21 @@ import {
 } from '@/components/ui/dialog'
 import { Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
+
 type Props = {
 	onScanResult: (result: string) => void
 }
 
 const QrScanner = (props: Props) => {
+	const { toast } = useToast()
 	const [result, setResult] = useState('')
 	const [isPlaying, setIsPlaying] = useState(false)
+	const [currency, setCurrency] = useState<number>(0)
+	const [fundingSource, setFundingSource] = useState<number>(0)
+	const [amount, setAmount] = useState<number>(0)
+	const [isDialogOpen, setIsDialogOpen] = useState(false)
+	const [pmntCode, setPmntCode] = useState<string>('')
 	const [error, setError] = useState('')
 
 	const onQRscan = (result: string) => {
@@ -41,6 +50,39 @@ const QrScanner = (props: Props) => {
 			}
 			setIsPlaying(!isPlaying)
 		}
+	}
+
+	const onQrScan = (result: string) => {
+		if (!result) return
+
+		const res = JSON.parse(result)
+		const { privyId, amount, currency, pmntCode } = res
+		if (!privyId) {
+			toast({
+				title: 'Invalid QR code',
+				description: 'Please scan a valid QR code.',
+				variant: 'destructive',
+			})
+			return
+		}
+
+		return (
+			<Dialog
+				open={isDialogOpen}
+				onOpenChange={() => setIsDialogOpen(!isDialogOpen)}
+			>
+				<DialogTrigger>
+					<Button onClick={() => setIsDialogOpen(true)}>Open Dialog</Button>
+				</DialogTrigger>
+
+				<ConfirmTransaction
+					pmntCode={pmntCode}
+					recipient={privyId}
+					amount={amount}
+					currency={currency}
+				/>
+			</Dialog>
+		)
 	}
 
 	return (
@@ -77,6 +119,7 @@ const QrScanner = (props: Props) => {
 				</DialogHeader>
 				<DialogFooter>
 					{/* <Button type='submit'>Save changes</Button> */}
+					{onQrScan(result)}
 				</DialogFooter>
 			</DialogContent>
 		</>

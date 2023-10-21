@@ -28,13 +28,16 @@ export default async function handler(
 				.status(404)
 				.json({ error: 'No fund connection found for this connection code' })
 		}
-
-		const user = await prisma.usertable.findUnique({
-			where: { privyuuid: fundconnection.privy_uuid },
-		})
-		if (!user) {
-			return res.status(404).json({ error: 'No user found for this uuid' })
+		let user
+		try {
+			user = await prisma.usertable.findFirst({
+				where: { privyuuid: fundconnection.privy_uuid },
+			})
+		} catch (e) {
+			return res.status(500).json(e)
 		}
+
+		if (!user) return res.status(500).json({ error: 'Something went wrong' })
 
 		return res.status(200).json({
 			privyuuid: user.privyuuid,

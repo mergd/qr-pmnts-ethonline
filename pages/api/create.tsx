@@ -1,8 +1,11 @@
 // FILEPATH: /pages/api/create.ts
 
 import { NextApiRequest, NextApiResponse } from 'next'
-import { walletClient, publicClient } from './config'
+import { publicClient } from '../../public/config'
 import pmntsABI from 'public/pmntsABI'
+import { Hex, createWalletClient, http, zeroAddress } from 'viem'
+import { baseGoerli } from 'viem/chains'
+import { privateKeyToAccount } from 'viem/accounts'
 import { PMNTS_ADDRESS } from '@/public/constants'
 import prisma from '@/lib/prisma'
 
@@ -11,6 +14,13 @@ export default async function handler(
 	res: NextApiResponse
 ) {
 	if (req.method === 'POST') {
+		const account = privateKeyToAccount(process.env.DEPLOYER_PK as Hex)
+
+		const walletClient = createWalletClient({
+			account,
+			chain: baseGoerli,
+			transport: http(),
+		})
 		const { address, privyuuid } = req.body
 
 		if (!address || !privyuuid) {
@@ -20,42 +30,53 @@ export default async function handler(
 		}
 
 		try {
-			// const { request, result } = await publicClient.simulateContract({
-			// 	address: PMNTS_ADDRESS,
-			// 	abi: pmntsABI,
-			// 	functionName: 'create',
-			// 	args: [address],
-			// })
-			console.log('about to kms')
-			const block = await publicClient.getBlock().catch((err) => {
-				console.log(' kms rn', err)
+			const { request, result } = await publicClient.simulateContract({
+				address: PMNTS_ADDRESS,
+				abi: pmntsABI,
+				functionName: 'create',
+				args: [address],
 			})
 
-			// const response = await walletClient.sendTransaction(request)
-			// const returnedString = result.toString()
+			const response = await walletClient.writeContract(request)
+			const returnedString = result.toString()
 
-			// await prisma.usertable.create({
-			// 	data: {
-			// 		privyuuid: privyuuid,
-			// 		useraddr: address,
-			// 		contractuuid: returnedString,
-			// 	},
-			// })
-			// // Log creation tx
-			// await prisma.usertxs.create({
-			// 	data: {
-			// 		txhash: response,
-			// 		privyuuid: privyuuid,
-			// 		amount: 0,
-			// 		currency: 0,
-			// 		time: new Date(),
-			// 	},
-			// })
-			const response = '1223'
+			await prisma.usertable.create({
+				data: {
+					privyuuid: privyuuid,
+					useraddr: address,
+					contractuuid: returnedString,
+				},
+			})
+			// Log creation tx
+
+			try {
+				await prisma.usertxs.create({
+					data: {
+						txhash: response,
+						privyuuid: privyuuid,
+						time: new Date(),
+						type: 'CREATE',
+						description: 'Account Creation',
+					},
+				})
+			} catch (e) {
+				console.log(e)
+			}
+
+			try {
+				await prisma.userPoints.create({
+					data: {
+						privy_uuid: privyuuid,
+						points: 50,
+					},
+				})
+			} catch (e) {
+				console.log(e)
+			}
 
 			return res.status(200).json({ response })
 		} catch (error) {
-			return res.status(500).json({ error: 'Failed to call contract function' })
+			return res.status(500).json({ error })
 		}
 	} else if (req.method === 'GET') {
 		const { userPrivyUUID } = req.query
@@ -78,7 +99,7 @@ export default async function handler(
 				.status(200)
 				.json({ userAddr: result.useraddr, contractUUID: result.contractuuid })
 		} catch (error) {
-			return res.status(500).json({ error: 'Failed to call contract function' })
+			return res.status(500).json({ error: 'Failed to retrieve user info' })
 		}
 	} else {
 		res.status(405).json({ error: 'Method not allowed' })

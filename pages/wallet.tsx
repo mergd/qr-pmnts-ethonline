@@ -12,9 +12,11 @@ import SelectCurrency from '@/components/select-currency'
 import { Label } from '@/components/ui/label'
 import { ChevronLeft } from 'lucide-react'
 import { useRouter } from 'next/router'
+import { publicClient } from '../public/config'
 
 const Wallet = () => {
 	const { toast } = useToast()
+
 	const router = useRouter()
 	const [currency, setCurrency] = useState<number>(0)
 	const [fundingSource, setFundingSource] = useState<number>(0)
@@ -26,7 +28,7 @@ const Wallet = () => {
 		router.push('/dashboard')
 	}
 
-	const { ready, authenticated, user } = usePrivy()
+	const { user } = usePrivy()
 	const { wallets } = useWallets()
 
 	const createAccount = async () => {
@@ -48,16 +50,15 @@ const Wallet = () => {
 		if (response && response.status === 200) {
 			toast({
 				title: 'Account Created!',
-				description: `${(
+				description: (
 					<div>
 						<Link href={`https://goerli.basescan.org/${response.body}`}>
-							{' '}
 							Transaction Hash
 						</Link>
 
 						<p> +50 points!</p>
 					</div>
-				)}`,
+				),
 			})
 			const json = await response.json()
 			console.log(json)
@@ -71,10 +72,11 @@ const Wallet = () => {
 			return Promise.reject()
 		}
 	}
+
 	return (
 		<AuthenticatedPage>
 			<ChevronLeft onClick={goToDashboard} className='h-8 w-8' />
-			<div className='flex h-screen flex-col items-center gap-4'>
+			<div className='mx-14 flex h-screen flex-col items-center gap-4'>
 				<Image
 					src={pmnts}
 					alt='PMNTS'
@@ -84,7 +86,7 @@ const Wallet = () => {
 				/>
 				<h1 className='text-3xl '>Your Account</h1>
 
-				<div className='flex flex-row justify-between px-4'>
+				<div className='flex flex-row justify-between '>
 					<div>
 						<p className='text-md mt-8 font-semibold text-gray-700'>
 							Export your private key
@@ -102,9 +104,17 @@ const Wallet = () => {
 						Export key
 					</button>
 				</div>
-				<p className='font-semibold text-gray-700'> Your linked accounts: </p>
-				<div className='flex flex-row justify-between gap-4'>
-					<p className='text-gray-600'> Link another funding source:</p>
+				<div className=' flex w-full items-baseline'>
+					{' '}
+					<p className=' text-md  text-right font-semibold text-gray-700'>
+						Your linked accounts:{' '}
+					</p>
+				</div>
+				<div className='flex w-full flex-row items-center justify-between gap-4'>
+					<p className=' text-sm text-gray-600'>
+						{' '}
+						Link another funding source:
+					</p>
 					<Link href={'/fundMobile'}>
 						<Button className='bg-slate-200'> Link</Button>
 					</Link>

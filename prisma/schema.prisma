@@ -8,14 +8,14 @@ datasource db {
 }
 
 model connectiondata {
-  id             String   @id @default(uuid())
-  privyuuid      String?
   currency       Int?     @default(0)
   amount         BigInt?  @default(0)
   description    String?
-  additionalData String? // JSON data of additional data
+  additionalData String?
   fulfilled      Boolean? @default(false)
   txhash         String?
+  id             String   @id @default(uuid())
+  privyuuid      String?
 }
 
 model fundconnection {

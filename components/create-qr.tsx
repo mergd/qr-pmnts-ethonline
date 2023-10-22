@@ -119,7 +119,7 @@ const QrPage = (props: Props) => {
 				}
 				return response.json()
 			})
-			.catch((err) => {
+			.catch((err: any) => {
 				console.log(err)
 			})
 		if (!response || !response.body) {
@@ -142,7 +142,7 @@ const QrPage = (props: Props) => {
 					text: 'Use this link to pay me',
 					url: `/paylink/${encodeURIComponent(qrData)}`,
 				})
-				.catch((error) => console.log('Error sharing', error))
+				.catch((err: any) => console.log('Error sharing', err))
 		} else {
 			// Paste to clipboard
 			navigator.clipboard.writeText(

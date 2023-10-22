@@ -66,7 +66,7 @@ const ConfirmTransaction = (props: Props) => {
 			// 			amount,
 			// 			currency,
 			// 		}),
-			// 	}).catch((err) => console.log(err))
+			// 	}).catch((err: any) => console.log(err))
 			// } else {
 			// }
 		} else {
@@ -117,7 +117,7 @@ const ConfirmTransaction = (props: Props) => {
 					.then((result) => {
 						return result.json()
 					})
-					.catch((err) => console.log(err))
+					.catch((err: any) => console.log(err))
 				recipContractUuid = res.body.contractUUID as bigint
 			}
 
@@ -130,7 +130,7 @@ const ConfirmTransaction = (props: Props) => {
 				.then((result) => {
 					return result.json()
 				})
-				.catch((err) => console.log(err))
+				.catch((err: any) => console.log(err))
 			recipContractUuid = res.body.contractUUID as bigint
 
 			const recipient = recipContractUuid ? recipContractUuid : recipAddr

@@ -18,7 +18,7 @@ export default async function handler(
 		.findFirst({
 			where: { connection_code: connectionCode },
 		})
-		.catch((err) => {
+		.catch((err: Error) => {
 			return res.status(500).json(err)
 		})
 

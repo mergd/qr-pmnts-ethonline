@@ -15,7 +15,7 @@ export default async function handler(
 			try {
 				await prisma.connectiondata.update({
 					where: {
-						id: payId,
+						id: payId as string,
 					},
 					data: {
 						fulfilled: true,
@@ -76,7 +76,7 @@ export default async function handler(
 					id: payId,
 				},
 			})
-			.catch((error) => {
+			.catch((err: any) => {
 				// End Stream if no payment request found
 				res.status(404).json({ error: 'Payment request not found' })
 				res.end()

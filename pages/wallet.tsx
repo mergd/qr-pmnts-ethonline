@@ -45,7 +45,7 @@ const Wallet = () => {
 				address: embeddedWallet?.address,
 				privyuuid: user?.id,
 			}),
-		}).catch((err) => console.log(err))
+		}).catch((err: any) => console.log(err))
 
 		if (response && response.status === 200) {
 			toast({

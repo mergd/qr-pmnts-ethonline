@@ -31,7 +31,7 @@ function FundMobile() {
 				body: JSON.stringify({ privyuuid: privyuuid }),
 			})
 				.then((response) => response.json())
-				.catch((err) => console.log(err))
+				.catch((err: any) => console.log(err))
 			console.log('privy uuid', privyuuid)
 
 			setConnectionCode(response.connectionCode)

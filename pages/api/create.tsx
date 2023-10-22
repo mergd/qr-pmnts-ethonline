@@ -45,7 +45,7 @@ export default async function handler(
 						contractuuid: returnedString,
 					},
 				})
-				.catch((err) => {
+				.catch((err: any) => {
 					return res.status(500).json(err)
 				})
 
@@ -67,16 +67,16 @@ export default async function handler(
 				return res.status(500).json(err)
 			}
 
-			try {
-				await prisma.userPoints.create({
-					data: {
-						privy_uuid: privyuuid,
-						points: 50,
-					},
-				})
-			} catch (err) {
-				return res.status(500).json(err)
-			}
+			// try {
+			// 	await prisma.useroints.create({
+			// 		data: {
+			// 			privy_uuid: privyuuid,
+			// 			points: 50,
+			// 		},
+			// 	})
+			// } catch (err) {
+			// 	return res.status(500).json(err)
+			// }
 
 			return res.status(200).json({ response })
 		} catch (error) {

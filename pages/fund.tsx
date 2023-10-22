@@ -1,11 +1,10 @@
 // React imports
-import { useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
 // Privy imports
 import { usePrivy, useWallets } from '@privy-io/react-auth'
-
 // Component imports
 import { Label } from '@/components/ui/label'
 import { CodeConnect } from '@/components/code-input'
@@ -33,6 +32,7 @@ import transfer from 'public/icons/mdi_transfer.png'
 import { Wallet2, ChevronLeft } from 'lucide-react'
 
 // Utility imports
+
 import { Address, maxUint256, zeroAddress } from 'viem'
 import {
 	parseEther,
@@ -61,13 +61,26 @@ import {
 
 const Fund = () => {
 	const { toast } = useToast()
+	const [submitted, setSubmitted] = useState(false)
 	const [retrievedAddr, setRetrievedAddr] = useState<Address>(zeroAddress)
 	const [requestedNetwork, setRequestedNetwork] = useState<Chain>(baseGoerli)
 	const [requestedCurrency, setRequestedCurrency] = useState<number>(0)
 	const [approveAmt, setApproveAmt] = useState<bigint>(BigInt(0))
 	const [userPrivyUUID, setUserPrivyUUID] = useState<string>('')
 	const [extWalletChainId, setExtWalletChainId] = useState<number>(0)
+	const { connectWallet } = usePrivy()
+	const { wallets } = useWallets()
+	const embeddedWallet = wallets.find(
+		(wallet) => wallet.walletClientType === 'privy'
+	)
 
+	const externalWallet = wallets.find(
+		(wallet) => wallet.walletClientType !== 'privy'
+	)
+
+	console.log(wallets)
+	const [txIsLoading, setTxIsLoading] = useState(false)
+	const [txHash, setTxHash] = useState<string | undefined>()
 	const networks = [
 		baseGoerli,
 		mantleTestnet,
@@ -76,6 +89,9 @@ const Fund = () => {
 		sepolia,
 		scrollSepolia,
 	]
+	useEffect(() => {
+		if (txHash) onFundAddr()
+	}, [txHash])
 	const alert = (
 		<Alert className=' rounded-md bg-blue-100 p-4 text-blue-700'>
 			<Wallet2 className='m h-4 w-4' />
@@ -118,6 +134,8 @@ const Fund = () => {
 	)
 
 	const codeSubmit = async (code: Array<string>) => {
+		// prevent codeSubmit
+		if (userPrivyUUID || submitted) return
 		const concatCode = code.join('')
 		console.log(concatCode)
 		let response
@@ -127,19 +145,22 @@ const Fund = () => {
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ connectionCode: code }),
+				body: JSON.stringify({ connectionCode: concatCode }),
 			})
 			console.log(response.status)
 		} catch (e) {
-			console.log()
+			console.log(e)
 		}
 		if (!response) return
 
 		if (response.status == 200) {
+			setSubmitted(true)
 			const json = await response.json()
 
 			setUserPrivyUUID(json.privyuuid)
 			setRetrievedAddr(json.useraddr)
+			console.log('addr', json.useraddr)
+			console.log('id set', json.privyuuid)
 		} else {
 			toast({
 				title: 'The code is invalid, or there was a backend error',
@@ -148,7 +169,6 @@ const Fund = () => {
 			})
 		}
 	}
-
 	const onFundAddr = async () => {
 		const response = await fetch('/api/fundAddr', {
 			method: 'POST',
@@ -157,20 +177,21 @@ const Fund = () => {
 			},
 			body: JSON.stringify({
 				privy_uuid: userPrivyUUID,
-				approveAmt: approveAmt,
+				approveAmt: approveAmt.toString(),
 				srcAddr: externalWallet?.address,
 				currency: requestedCurrency,
 				txhash: txHash,
 			}),
 		})
 		if (!response.ok) {
-			console.log(response.status, response.statusText)
+			const responseBody = await response.json()
+			console.log(response.status, responseBody.error)
 		}
 	}
 
 	const connectCard = (
 		<Card className='max-w-[400] overflow-hidden rounded-lg shadow-lg'>
-			<CardTitle className=' p-4 font-serif'>
+			<CardTitle className=' p-4 font-serif font-semibold text-slate-800'>
 				Open Approval for Tokens
 			</CardTitle>
 			<div className='mx-4 my-2 p-2'>
@@ -182,18 +203,6 @@ const Fund = () => {
 			</div>
 		</Card>
 	)
-
-	const { connectWallet } = usePrivy()
-	const { wallets } = useWallets()
-	const embeddedWallet = wallets.find(
-		(wallet) => wallet.walletClientType === 'privy'
-	)
-
-	const externalWallet = wallets.find(
-		(wallet) => wallet.walletClientType !== 'privy'
-	)
-	const [txIsLoading, setTxIsLoading] = useState(false)
-	const [txHash, setTxHash] = useState<string | undefined>()
 
 	const onApprove = async () => {
 		if (!externalWallet || !embeddedWallet) return
@@ -222,13 +231,13 @@ const Fund = () => {
 				abi: ERC20ABI,
 				functionName: 'approve',
 				args: [PMNTS_ADDRESS, approveAmt],
+				account: externalWallet.address as Address,
 			})
 
-			const _txHash = await walletClient.sendTransaction(request)
+			const _txHash = await walletClient.writeContract(request)
 
 			setTxHash(_txHash)
 			// Update backend
-			onFundAddr()
 		} catch (e) {
 			console.error('Transfer failed with error ', e)
 		}
@@ -281,7 +290,7 @@ const Fund = () => {
 
 	const currencySelect = (
 		<Select onValueChange={(e) => setRequestedCurrency(parseInt(e))}>
-			<SelectTrigger className='w-[220px]'>
+			<SelectTrigger className='w-[180px]'>
 				<SelectValue placeholder={'USD'} />
 			</SelectTrigger>
 			<SelectContent className='bg-slate-50'>
@@ -327,11 +336,11 @@ const Fund = () => {
 					</p>
 				)}
 			</div>
-			<p className='mt-2 text-sm text-gray-600'></p>
+			{/* <p className='mt-2 text-sm text-gray-600'></p> */}
 			{!externalWallet && (
 				<button
 					type='button'
-					className='mt-2 w-full rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-indigo-400'
+					className='mt-4 w-full rounded-md bg-indigo-600 py-2 text-sm font-semibold text-white shadow-sm disabled:bg-indigo-400'
 					onClick={connectWallet}
 				>
 					{!externalWallet ? 'Connect a wallet' : 'Connect another wallet?'}
@@ -339,7 +348,7 @@ const Fund = () => {
 			)}
 			{externalWallet && (
 				<div>
-					<p className='text-md mt-2 text-gray-800'>
+					<p className='text-md mt-4 text-gray-800'>
 						{' '}
 						Connected Wallet:{' '}
 						<span className='rounded-md bg-blue-600 px-2 py-1 text-sm font-semibold text-slate-200'>
@@ -348,19 +357,22 @@ const Fund = () => {
 								externalWallet.address.slice(-4)}
 						</span>
 					</p>
-					<div className='mt-2 flex flex-row items-center justify-between gap-4'>
-						<p className='mt-2 text-sm text-gray-600'>Chain: </p>
-						{chainSelect}
+					<div className='mt-4 flex flex-row items-center justify-between gap-4'>
+						<div>
+							<Label className='mt-4 text-sm text-gray-600'>Chain: </Label>
+							{chainSelect}
+						</div>
+						<div>
+							<Label className='mt-4 text-sm text-gray-600'>Currency: </Label>
 
-						<p className='mt-2 text-sm text-gray-600'>Currency: </p>
-
-						{currencySelect}
+							{currencySelect}
+						</div>
 					</div>
 
 					<div>
 						<Label
 							htmlFor='approveAmt'
-							className='mb-1 mt-2 flex justify-between '
+							className='mb-1 mt-4 flex justify-between '
 						>
 							{' '}
 							<span>Approve Amount</span>{' '}

@@ -5,13 +5,16 @@ export const PMNTS_ADDRESS =
 
 export const deployerAddr =
 	'0x5B61cE87191064291B2a46376d4787AB6Fe24d65' as Address
-
+	// mock sDAI (erc4626): 0xa150252609441246e96611183de1D51E4a3bef6D
+	// mockToken0: 0xca0333ed4939c1e5bc4cee11b96bbce9e92b238e
+	// mockToken1: 0xa150252609441246e96611183de1d51e4a3bef6d
+	// mockToken2: 0x3AE7888C0ba38F5b8EfCA7ac158c73a7Fb84b752
 export const CURRENCIES = [
 	{
 		id: '1',
 		name: 'USD',
 		symbol: 'USDC',
-		address: '0x5c90c2f1022f8c67ed5b162c2754ce8da9a66e3a' as Address,
+		address: '0xca0333ed4939c1e5bc4cee11b96bbce9e92b238e' as Address,
 		decimals: 18,
 		icon: 'usdc.png',
 	},
@@ -19,7 +22,7 @@ export const CURRENCIES = [
 		id: '2',
 		name: 'Ethereum',
 		symbol: 'WETH',
-		address: '0x5c90c2f1022f8c67ed5b162c2754ce8da9a66e3a' as Address,
+		address: '0xa150252609441246e96611183de1d51e4a3bef6d' as Address,
 		decimals: 18,
 		icon: 'ethereum.png',
 	},
@@ -27,7 +30,7 @@ export const CURRENCIES = [
 		id: '3',
 		name: 'Apecoin',
 		symbol: 'APE',
-		address: '0x5c90c2f1022f8c67ed5b162c2754ce8da9a66e3a' as Address,
+		address: '0x3AE7888C0ba38F5b8EfCA7ac158c73a7Fb84b752' as Address,
 		decimals: 18,
 		icon: 'apecoin.png',
 	},
@@ -35,13 +38,13 @@ export const CURRENCIES = [
 		id: '4',
 		name: 'Savings DAI',
 		symbol: 'sDAI',
-		address: '0x5c90c2f1022f8c67ed5b162c2754ce8da9a66e3a' as Address,
+		address: '0xa150252609441246e96611183de1D51E4a3bef6D' as Address,
 		decimals: 18,
 		icon: 'sdai.png',
 	},
 ]
 
-const addr1 = '0x000000000000000000000001' as Address
+const addr1 = '0xa150252609441246e96611183de1D51E4a3bef6D' as Address
 
 export const YieldData = [
 	{
@@ -71,7 +74,7 @@ export const YieldData = [
 				yieldAddress: addr1,
 			},
 		],
-		address: addr1,
+		address: '0xca0333ed4939c1e5bc4cee11b96bbce9e92b238e' as Address,
 	},
 	{
 		id: 2,
@@ -103,7 +106,7 @@ export const YieldData = [
 				yieldAddress: addr1,
 			},
 		],
-		address: addr1,
+		address: '0xa150252609441246e96611183de1d51e4a3bef6d' as Address,
 	},
 	{
 		id: 3,
@@ -126,6 +129,6 @@ export const YieldData = [
 				yieldAddress: addr1,
 			},
 		],
-		address: addr1,
+		address: '0x3AE7888C0ba38F5b8EfCA7ac158c73a7Fb84b752' as Address,
 	},
 ]

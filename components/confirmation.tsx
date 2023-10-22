@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useZxing } from 'react-zxing'
 import CheckNative from './hooks/check-native-bal'
 import SelectFundingSource from './set-funding-src'
+import SelectCurrency from './select-currency'
 import {
 	Dialog,
 	DialogContent,
@@ -26,6 +27,8 @@ import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { PMNTS_ADDRESS, CURRENCIES, deployerAddr } from '@/public/constants'
 import pmntsABI from '@/public/pmntsABI'
 import { publicClient } from '@/public/config'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 type Props = {
 	recipient: bigint
 	pmntCode?: string
@@ -37,9 +40,9 @@ const ConfirmTransaction = (props: Props) => {
 	const { wallets } = useWallets()
 	const { user, sendTransaction } = usePrivy()
 	const [recipient, setRecipient] = useState(props.recipient)
-	const [amount, setAmount] = useState(props.amount ? props.amount : 0)
+	const [amount, setAmount] = useState(props.amount)
 	const [fundingSource, setFundingSource] = useState<number>(0)
-	const [currency, setCurrency] = useState(props.currency ? props.currency : 0)
+	const [currency, setCurrency] = useState(props.currency)
 
 	const embeddedWallet = wallets.find(
 		(wallet) => wallet.walletClientType === 'privy'
@@ -160,6 +163,67 @@ const ConfirmTransaction = (props: Props) => {
 		}
 	}
 
+	// const paymentRequest = (
+	// 	<div>
+	// 			<p>
+	// 					Are you sure you want to send {props.amount}{' '}
+	// 					{CURRENCIES[currency].name} to the recipient?
+	// 				</p>
+	// 				<div className='mt-4'>
+	// 					<SelectFundingSource
+	// 						currency={currency}
+	// 						handleFundingSource={setFundingSource}
+	// 					/>
+	// 				</div>
+	// 	</div>
+	// )
+
+	const setPayandCurrency = (
+		<div>
+			<SelectCurrency handleCurrency={setCurrency} />
+			{props.currency && (
+				<Label htmlFor={'inputAmt'}>
+					Amount of {CURRENCIES[props.currency].symbol}{' '}
+				</Label>
+			)}
+			<Input
+				id='inputAmt'
+				onChange={(e) => setAmount(parseInt(e.target.value))}
+				className='mt-4 px-2'
+			/>
+		</div>
+	)
+
+	const paymentRequest = (
+		<p>
+			Are you sure you want to send {props.amount}{' '}
+			{props.currency ? CURRENCIES[props.currency].name : ''} to the recipient?
+		</p>
+	)
+
+	const setPayAmount = (
+		<div>
+			{props.currency && (
+				<Label htmlFor={'inputAmt'}>
+					Amount of {CURRENCIES[props.currency].symbol}{' '}
+				</Label>
+			)}
+			<Input
+				id='inputAmt'
+				onChange={(e) => setAmount(parseInt(e.target.value))}
+			/>
+		</div>
+	)
+
+	const showPaymentRequest = () => {
+		if (!props.currency) {
+			return setPayandCurrency
+		} else if (!props.amount || props.amount === 0) {
+			return setPayAmount
+		} else {
+			return paymentRequest
+		}
+	}
 	return (
 		<DialogContent className='bg-zinc-100'>
 			<DialogHeader>
@@ -168,20 +232,27 @@ const ConfirmTransaction = (props: Props) => {
 					<p className='font-semibold text-slate-700'>Confirm Transaction</p>
 				</DialogTitle>
 				<DialogDescription>
-					<p>
-						Are you sure you want to send {props.amount}{' '}
-						{CURRENCIES[currency].name} to the recipient?
-					</p>
-					<div className='mt-4'>
-						<SelectFundingSource
-							currency={currency}
-							handleFundingSource={setFundingSource}
-						/>
+					<div className='flex flex-col gap-3'>
+						{showPaymentRequest()}
+
+						<div>
+							{currency && (
+								<SelectFundingSource
+									currency={currency}
+									handleFundingSource={setFundingSource}
+								/>
+							)}
+						</div>
 					</div>
 				</DialogDescription>
 			</DialogHeader>
 			<DialogFooter>
-				<Button className='bg-blue-500 text-white' type='submit'>
+				<Button
+					className={`bg-blue-500 text-white ${
+						amount && currency ? '' : 'disabled'
+					}`}
+					type='submit'
+				>
 					Confirm
 				</Button>
 			</DialogFooter>

@@ -36,17 +36,21 @@ export default async function handler(
 				functionName: 'create',
 				args: [address],
 			})
+			const returnedString = result.toString()
+			await prisma.usertable
+				.create({
+					data: {
+						privyuuid: privyuuid,
+						useraddr: address,
+						contractuuid: returnedString,
+					},
+				})
+				.catch((err) => {
+					return res.status(500).json(err)
+				})
 
 			const response = await walletClient.writeContract(request)
-			const returnedString = result.toString()
 
-			await prisma.usertable.create({
-				data: {
-					privyuuid: privyuuid,
-					useraddr: address,
-					contractuuid: returnedString,
-				},
-			})
 			// Log creation tx
 
 			try {
@@ -59,8 +63,8 @@ export default async function handler(
 						description: 'Account Creation',
 					},
 				})
-			} catch (e) {
-				console.log(e)
+			} catch (err) {
+				return res.status(500).json(err)
 			}
 
 			try {
@@ -70,8 +74,8 @@ export default async function handler(
 						points: 50,
 					},
 				})
-			} catch (e) {
-				console.log(e)
+			} catch (err) {
+				return res.status(500).json(err)
 			}
 
 			return res.status(200).json({ response })

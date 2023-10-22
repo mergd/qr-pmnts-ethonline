@@ -4,6 +4,7 @@
 // module.exports = withPWA({
 // 	pwa: {
 // 		register: true,
+// disableDevLogs: true,
 // 		skipWaiting: true,
 // 		dest: 'public',
 // 		runtimeCaching,
@@ -13,6 +14,7 @@
 const runtimeCaching = require('next-pwa/cache')
 const withPWA = require('next-pwa')({
 	dest: 'public',
+	disableDevLogs: true,
 	register: true,
 	skipWaiting: true,
 	runtimeCaching,

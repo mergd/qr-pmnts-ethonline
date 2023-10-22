@@ -7,71 +7,85 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table'
-
-const invoices = [
+import { CURRENCIES } from '@/public/constants'
+import Image from 'next/image'
+const transactions = [
 	{
-		invoice: 'INV001',
-		paymentStatus: 'Paid',
-		totalAmount: '$250.00',
-		paymentMethod: 'Credit Card',
+		txHash: '0x1d16315464875554265345435',
+		date: '10-22-2023',
+		description: 'sDAI deposited into',
+		currency: 3,
+		amount: 100,
+		pointsEarned: 100,
 	},
 	{
-		invoice: 'INV002',
-		paymentStatus: 'Pending',
-		totalAmount: '$150.00',
-		paymentMethod: 'PayPal',
+		txHash: '0xad16315464875554265945434',
+		date: '10-22-2023',
+		description: 'Funding Source Linked',
+		currency: 0,
+		amount: 0,
+		pointsEarned: 50,
 	},
 	{
-		invoice: 'INV003',
-		paymentStatus: 'Unpaid',
-		totalAmount: '$350.00',
-		paymentMethod: 'Bank Transfer',
-	},
-	{
-		invoice: 'INV004',
-		paymentStatus: 'Paid',
-		totalAmount: '$450.00',
-		paymentMethod: 'Credit Card',
-	},
-	{
-		invoice: 'INV005',
-		paymentStatus: 'Paid',
-		totalAmount: '$550.00',
-		paymentMethod: 'PayPal',
-	},
-	{
-		invoice: 'INV006',
-		paymentStatus: 'Pending',
-		totalAmount: '$200.00',
-		paymentMethod: 'Bank Transfer',
-	},
-	{
-		invoice: 'INV007',
-		paymentStatus: 'Unpaid',
-		totalAmount: '$300.00',
-		paymentMethod: 'Credit Card',
+		txHash: '0x8e16315464875554265345434',
+		date: '10-22-2023',
+		description: 'Account Set Up',
+		currency: null,
+		amount: null,
+		pointsEarned: 50,
 	},
 ]
 
 export function TableDemo() {
 	return (
 		<Table>
-			<TableCaption>Your transactions</TableCaption>
+			{/* <TableCaption>Your transactions</TableCaption> */}
 			<TableHeader>
 				<TableRow>
-					<TableHead className='w-[100px]'>Invoice</TableHead>
-					<TableHead>Status</TableHead>
-					<TableHead>Method</TableHead>
+					<TableHead className='w-[100px]'>Date</TableHead>
+					<TableHead>Currency</TableHead>
+					<TableHead>Description</TableHead>
+					<TableHead>ID</TableHead>
+					<TableHead>Points</TableHead>
 					<TableHead className='text-right'>Amount</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{invoices.map((invoice) => (
-					<TableRow key={invoice.invoice}>
-						<TableCell className='font-medium'>{invoice.invoice}</TableCell>
-						<TableCell>{invoice.paymentStatus}</TableCell>
-						<TableCell>{invoice.paymentMethod}</TableCell>
-						<TableCell className='text-right'>{invoice.totalAmount}</TableCell>
+				{transactions.map((tx) => (
+					<TableRow key={tx.txHash}>
+						<TableCell className='font-medium'>{tx.date}</TableCell>
+						<TableCell>
+							{tx.currency ? (
+								<div className='flex flex-row items-center gap-1'>
+									<Image
+										src={`/icons/${CURRENCIES[tx.currency].icon}`}
+										height={15}
+										width={15}
+										alt='token image'
+										className='-mb-1'
+									/>{' '}
+									{CURRENCIES[tx.currency].symbol}
+								</div>
+							) : (
+								''
+							)}
+						</TableCell>
+						<TableCell>{tx.description ? tx.description : ''}</TableCell>
+						<TableCell>
+							{
+								<span className='underline-1 text-slate-500'>
+									{' '}
+									{tx.txHash.substring(0, 4)}{' '}
+								</span>
+							}
+						</TableCell>
+						<TableCell>{tx.pointsEarned}</TableCell>
+						<TableCell className='text-right'>
+							{' '}
+							{tx.amount && tx.currency
+								? `${tx.amount + ' ' + CURRENCIES[tx.currency].symbol}`
+								: ''}{' '}
+						</TableCell>
 					</TableRow>
 				))}
 			</TableBody>

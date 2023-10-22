@@ -32,6 +32,7 @@ const QrScanner = (props: Props) => {
 	const onQRscan = (result: string) => {
 		setResult(result)
 		props.onScanResult(result)
+		setIsDialogOpen(true)
 	}
 
 	const { ref } = useZxing({
@@ -67,12 +68,11 @@ const QrScanner = (props: Props) => {
 		}
 
 		return (
-			<Dialog
-				open={isDialogOpen}
-				onOpenChange={() => setIsDialogOpen(!isDialogOpen)}
-			>
+			<Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
 				<DialogTrigger>
-					<Button onClick={() => setIsDialogOpen(true)}>Open Dialog</Button>
+					<Button onClick={() => setIsDialogOpen(true)}>
+						pmnts Code Found. Tap to confirm.
+					</Button>
 				</DialogTrigger>
 
 				<ConfirmTransaction
@@ -117,10 +117,7 @@ const QrScanner = (props: Props) => {
 						)}
 					</Button>
 				</DialogHeader>
-				<DialogFooter>
-					{/* <Button type='submit'>Save changes</Button> */}
-					{onQrScan(result)}
-				</DialogFooter>
+				<DialogFooter>{onQrScan(result)}</DialogFooter>
 			</DialogContent>
 		</>
 	)

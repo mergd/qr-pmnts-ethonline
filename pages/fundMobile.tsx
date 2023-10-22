@@ -30,10 +30,11 @@ function FundMobile() {
 				},
 				body: JSON.stringify({ privyuuid: privyuuid }),
 			})
+				.then((response) => response.json())
+				.catch((err) => console.log(err))
 			console.log('privy uuid', privyuuid)
-			console.log(response.status)
-			const json = await response.json()
-			setConnectionCode(json.connectionCode)
+
+			setConnectionCode(response.connectionCode)
 		}
 		callFunc()
 	}, [privyuuid])

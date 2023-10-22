@@ -121,8 +121,6 @@ const Dashboard = () => {
 			</Section>
 			{pointsbanner}
 			{TableDemo()}
-
-			<Link href='/fundMobile'>test</Link>
 		</AuthenticatedPage>
 	)
 }
